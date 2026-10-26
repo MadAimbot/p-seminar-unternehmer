@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Der Unternehmer | Apple Keynote 3D Canvas</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --card-bg: rgba(22, 22, 26, 0.82);
+      --card-dim: rgba(10, 10, 12, 0.4);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --card-border-active: rgba(255, 255, 255, 0.45);
+      --apple-blue: #2997ff;
+      --apple-gold: #f5a623;
+      --apple-green: #30d158;
+      --apple-red: #ff453a;
+      --edeka-blue: #0070d2;
+      --zooco-amber: #f59e0b;
+      --goepi-green: #10b981;
+      --text-white: #ffffff;
+      --text-secondary: #a1a1a6;
+      --text-dim: #636366;
+      --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --ease-cinematic: cubic-bezier(0.2, 0.85, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text-white);
+      font-family: var(--font-apple);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      position: fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* DUAL AMBIENT GLOW: Seamless cross-fading for butter-smooth color transitions (no off/on blinking) */
+    .glow-layer {
+      position: absolute;
+      width: 1200px;
+      height: 1200px;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+      z-index: 1;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: opacity 2.2s var(--ease-cinematic);
+      will-change: opacity, background;
+    }
+    #ambientGlow1 {
+      opacity: 1;
+      background: radial-gradient(circle, rgba(41, 151, 255, 0.35), transparent 70%);
+    }
+    #ambientGlow2 {
+      opacity: 0;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.35), transparent 70%);
+    }
+
+    /* 3D Viewport */
+    .viewport {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      perspective: 1400px;
+      perspective-origin: 50% 50%;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Infinite Spatial World: Paced at 2.4s for cinematic gliding camera moves */
+    .world {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-style: preserve-3d;
+      transition: transform 2.4s var(--ease-cinematic);
+      will-change: transform;
+    }
+
+    /* Station Coordinates in 3D Space */
+    .station {
+      position: absolute;
+      width: 1140px;
+      min-height: 600px;
+      left: 50%;
+      top: 50%;
+      margin-left: -570px;
+      margin-top: -300px;
+      transform-style: preserve-3d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.4s var(--ease-cinematic);
+      cursor: default;
+    }
+
+    /* 9 Station Coordinates in Infinite Canvas (S-Curve Serpentine Grid) */
+    #station-1 { transform: translate3d(0, 0, 0); }
+    #station-2 { transform: translate3d(2600px, 0, 0); }
+    #station-3 { transform: translate3d(5200px, 0, 0); }
+    #station-4 { transform: translate3d(5200px, 2200px, 0); }
+    #station-5 { transform: translate3d(2600px, 2200px, 0); }
+    #station-6 { transform: translate3d(0, 2200px, 0); }
+    #station-7 { transform: translate3d(0, 4400px, 0); }
+    #station-8 { transform: translate3d(2600px, 4400px, 0); }
+    #station-9 { transform: translate3d(5200px, 4400px, 0); }
+
+    /* Bento Grid Layouts */
+    .bento-grid {
+      display: grid;
+      gap: 28px;
+      width: 100%;
+      max-width: 1140px;
+      transform-style: preserve-3d;
+    }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+    /* Glassmorphism Bento Card */
+    .bento-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 34px 30px;
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 380px;
+      position: relative;
+      transition: transform 1.6s var(--ease-cinematic), border-color 0.8s ease, box-shadow 1s ease, opacity 1s ease, filter 1s ease;
+      transform-style: preserve-3d;
+      will-change: transform, opacity, filter;
+      cursor: pointer;
+    }
+
+    /* ACTIVE SPOTLIGHT: Starker 3D-Zoom für maximale Lesbarkeit in den hinteren Reihen */
+    .bento-card.active-spotlight {
+      border-color: var(--card-border-active);
+      box-shadow: 0 45px 110px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      opacity: 1 !important;
+      filter: blur(0px) !important;
+      transform: scale(1.08) translateZ(50px) !important;
+      pointer-events: auto !important;
+    }
+
+    /* DEEP BACKGROUND BLUR (8px): Inaktive Kacheln werden stark unscharf */
+    .bento-card.dimmed {
+      opacity: 0.15 !important;
+      filter: blur(8px) !important;
+      transform: scale(0.95) translateZ(-20px);
+      pointer-events: none;
+    }
+
+    /* Image Slot for Helmut Piston */
+    .card-image-slot {
+      width: 100%;
+      height: 145px;
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-image-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Station Titles */
+    .station-header {
+      margin-bottom: 34px;
+      text-align: center;
+      transition: opacity 1s ease, transform 1.2s var(--ease-cinematic);
+      will-change: opacity, transform;
+    }
+    .station-title {
+      font-size: 3.3rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-white);
+      line-height: 1.15;
+    }
+    .station-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+      font-weight: 400;
+    }
+
+    .station-header.header-focused {
+      opacity: 1 !important;
+      transform: scale(1.02);
+    }
+    .station-header.header-dimmed {
+      opacity: 0.28;
+      transform: scale(0.98);
+    }
+
+    /* Badges & Icons */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid transparent;
+    }
+    .icon-box svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .card-title {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-white);
+      margin-bottom: 14px;
+      line-height: 1.25;
+    }
+
+    /* 100% BULLET POINT FORMAT (NO CONTINUOUS TEXT) */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+    .bullet-list li {
+      font-size: 1.02rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .bullet-dot {
+      color: var(--apple-blue);
+      font-weight: bold;
+      line-height: 1.3;
+    }
+    .bullet-list li strong {
+      color: var(--text-white);
+    }
+
+    .stat-highlight {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin: 14px 0 6px 0;
+    }
+
+    /* Overview Mode (Perfect Center on 3x3 Galaxy at x: 2600, y: 2200) */
+    .world.overview-mode {
+      transform: translate3d(-2600px, -2200px, -6200px) rotateX(18deg) !important;
+      transition: transform 1.8s var(--ease-cinematic);
+    }
+    .world.overview-mode .station {
+      cursor: pointer;
+    }
+    .world.overview-mode .bento-card {
+      opacity: 0.9 !important;
+      filter: blur(0px) !important;
+    }
+    .world.overview-mode .station-header {
+      opacity: 1 !important;
+    }
+
+    /* OVERVIEW CLICK OVERLAY */
+    .overview-hit-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      display: none;
+      pointer-events: none;
+    }
+    .overview-mode + .overview-hit-overlay,
+    body.is-overview .overview-hit-overlay {
+      display: block;
+      pointer-events: auto;
+    }
+    .overview-grid-map {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      grid-template-columns: repeat(3, 270px);
+      grid-template-rows: repeat(3, 140px);
+      gap: 18px;
+    }
+    .overview-tile-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: #fff;
+      font-family: var(--font-apple);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, border-color 0.2s;
+    }
+    .overview-tile-btn:hover, .overview-tile-btn:active {
+      background: rgba(41, 151, 255, 0.28);
+      border-color: var(--apple-blue);
+      transform: scale(1.04);
+    }
+    .overview-tile-btn span.num {
+      font-size: 0.75rem;
+      color: var(--apple-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* AUTO-HIDING FLOATING HUD DOCK */
+    .hud-trigger-zone {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      z-index: 199;
+      pointer-events: auto;
+    }
+
+    .hud-bar {
+      position: fixed;
+      bottom: 24px;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translate(-50%, 85px);
+      opacity: 0;
+      pointer-events: none;
+      background: rgba(28, 28, 30, 0.92);
+      backdrop-filter: blur(35px) saturate(180%);
+      -webkit-backdrop-filter: blur(35px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 40px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 200;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      touch-action: manipulation;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    /* Reveal HUD on trigger hover, bar hover, or active class */
+    .hud-trigger-zone:hover + .hud-bar,
+    .hud-bar:hover,
+    .hud-bar.hud-visible {
+      transform: translate(-50%, 0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .hud-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: background 0.2s, transform 0.15s;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hud-btn:hover, .hud-btn:active {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.08);
+    }
+
+    .hud-counter {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      min-width: 68px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .hud-counter:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .hud-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .hud-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hud-pill:hover, .hud-pill:active {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--text-white);
+    }
+    .hud-pill.highlight {
+      background: rgba(41, 151, 255, 0.2);
+      border-color: rgba(41, 151, 255, 0.4);
+      color: var(--apple-blue);
+    }
+
+    /* Touch Navigation Hotspots */
+    .touch-edge {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 16%;
+      z-index: 15;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .touch-edge-left { left: 0; }
+    .touch-edge-right { right: 0; }
+
+    /* In-Page Notes Overlay (iPad & Fallback) */
+    .notes-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 24px;
+    }
+    .notes-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .notes-card {
+      background: rgba(28, 28, 30, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 640px;
+      padding: 32px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .notes-card h2 {
+      font-size: 1.5rem;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .notes-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .notes-box h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--apple-blue);
+      margin-bottom: 10px;
+    }
+    .notes-box p {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      color: #fff;
+      font-weight: 400;
+    }
+
+    /* Responsive Scaling & iPad Optimizations */
+    @media (max-width: 1200px) {
+      .station {
+        transform-origin: center center;
+        scale: 0.88;
+      }
+      .hud-bar {
+        scale: 0.94;
+        bottom: 20px;
+      }
+      .touch-edge {
+        width: 18%;
+      }
+    }
+    @media (max-width: 900px) {
+      .station {
+        scale: 0.74;
+      }
+      .hud-pill:not(.always-show) {
+        display: none;
+      }
+    }
+    @media (max-height: 750px) {
+      .station {
+        scale: 0.78;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Touch Hotspots (iPad & Clicker) -->
+  <div class="touch-edge touch-edge-left" id="touchPrev" title="Zurück"></div>
+  <div class="touch-edge touch-edge-right" id="touchNext" title="Weiter"></div>
+
+  <!-- DUAL AMBIENT GLOW: Seamless crossfading color transitions -->
+  <div class="glow-layer" id="ambientGlow1"></div>
+  <div class="glow-layer" id="ambientGlow2"></div>
+
+  <!-- 3D Perspective Viewport -->
+  <div class="viewport" id="viewport">
+    <div class="world" id="world">
+
+      <!-- ========================================================
+           STATION 1: PROLOG & GRUNDDEFINITION (WAS IST EIN UNTERNEHMER?)
+           ======================================================== -->
+      <div class="station" id="station-1">
+        <div class="station-header" id="header-station-1">
+          <div id="s1-eyebrow" style="color: var(--apple-blue); font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px;">
+            P-SEMINAR BERUFSBILDER
+          </div>
+          <h1 id="s1-title" style="font-size: 4.8rem; font-weight: 800; letter-spacing: -0.04em; color: var(--text-white); margin-bottom: 14px; line-height: 1.08;">
+            Der Unternehmer
+          </h1>
+          <p id="s1-subtitle" style="font-size: 1.5rem; color: var(--text-secondary); max-width: 720px; margin: 0 auto; line-height: 1.4; font-weight: 400;">
+            Zwischen strategischer Vision, vollem Risiko und echter Verantwortung
+          </p>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-1" style="margin-top: 10px;">
+          
+          <div class="bento-card" id="card-s1-definition">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(41, 151, 255, 0.18); color: #2997ff; border: 1px solid rgba(41, 151, 255, 0.35);">
+                GRUNDDEFINITION
+              </div>
+              <div class="card-title">Was ist ein Unternehmer?</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Eigene Firma:</strong> Gründet oder übernimmt einen eigenständigen Betrieb</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Selbstverwaltung:</strong> Trifft alle Entscheidungen autonom – kein Chef über ihm</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Volles Risiko:</strong> Wirtschaftlicher Gewinn oder Verlust liegt zu 100% bei ihm</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Ziel:</strong> Dauerhaft Werte &amp; Arbeitsplätze schaffen statt reiner Stundenlohn</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Volle Eigenverantwortung als Lebensmodell
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-s1-comparison">
+            <div>
+              <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(245, 166, 35, 0.18); color: #f5a623; border: 1px solid rgba(245, 166, 35, 0.35);">
+                DER VERGLEICH
+              </div>
+              <div class="card-title">Unternehmer vs. Angestellter</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Angestellter:</strong> Festes Monatsgehalt, klare Arbeitszeit &amp; Kündigungsschutz</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Unternehmer:</strong> Kein garantiertes Gehalt, keine Stechuhr, volle Haftung</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Weisung:</strong> Führt Vorgaben aus vs. bestimmt die Richtung der Firma</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Freiheit &amp; Druck:</strong> Maximale Unabhängigkeit bei vollem Ernstfall-Risiko</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-gold); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Freiheit gibt es nur im Paket mit Risiko
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 2: DAS BERUFSBILD (DIE 3 ROLLEN IM ALLTAG)
+           ======================================================== -->
+      <div class="station" id="station-2">
+        <div class="station-header" id="header-station-2">
+          <h2 class="station-title">Das Berufsbild &amp; die 3 Rollen im Alltag</h2>
+          <div class="station-subtitle">Was macht ein Unternehmer eigentlich jeden Tag? (Allgemeingültig für alle Branchen)</div>
+        </div>
+        <div class="bento-grid grid-3" id="grid-station-2">
+          
+          <div class="bento-card" id="card-role-strategist">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              </div>
+              <div class="card-title">Rolle 1: Der Stratege</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Zukunftsplan:</strong> Wo soll die Firma in 3 bis 5 Jahren stehen?</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Markt &amp; Angebote:</strong> Neue Produkte, Dienstleistungen oder Filialen planen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Wettbewerb:</strong> Konkurrenten beobachten und eigene Stärken ausbauen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Investitionen:</strong> Gezielter Einsatz von Kapital für Technik &amp; Gebäude</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Langfristiger Kompass für die Zukunft
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-role-crisis">
+            <div>
+              <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+              </div>
+              <div class="card-title">Rolle 2: Der Krisenmanager</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Akute Probleme:</strong> Großkunden springen ab, Lieferketten reißen oder Kosten steigen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Kein Feierabend:</strong> Ernstfälle landen immer direkt beim Chef</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Schnelle Lösungen:</strong> Entscheidungsdruck unter Zeitnot aushalten</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Ständige Bereitschaft:</strong> Verantwortung rund um die Uhr</span></li>
+              </ul>
+            </div>
+            <div>
+              <div class="stat-highlight" style="color: var(--apple-gold);">60h+</div>
+              <div style="color: var(--text-secondary); font-size: 0.9rem;">Wöchentliche Arbeitsbelastung</div>
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-role-leader">
+            <div>
+              <div class="icon-box" style="color: var(--apple-green); background: rgba(48, 209, 88, 0.12); border-color: rgba(48, 209, 88, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+              </div>
+              <div class="card-title">Rolle 3: Die Führungskraft</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Teamaufbau:</strong> Die richtigen Mitarbeiter finden, anlernen und halten</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Vorbildfunktion:</strong> Fairness, Verlässlichkeit und Motivation vorleben</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Sicherheit:</strong> Pünktliche Löhne für die Belegschaft garantieren</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Soziale Pflicht:</strong> Verantwortung für Mitarbeiter &amp; deren Familien</span></li>
+              </ul>
+            </div>
+            <div>
+              <div class="stat-highlight" style="color: var(--apple-green);">100%</div>
+              <div style="color: var(--text-secondary); font-size: 0.9rem;">Verantwortung für das Team</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 3: QUALIFIKATIONEN: HARD SKILLS VS. SOFT SKILLS
+           ======================================================== -->
+      <div class="station" id="station-3">
+        <div class="station-header" id="header-station-3">
+          <h2 class="station-title">Qualifikationen: Hard Skills vs. Soft Skills</h2>
+          <div class="station-subtitle">Kopf vs. Charakter – Was braucht man wirklich?</div>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-3">
+          
+          <div class="bento-card" id="card-hard-skills">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(41, 151, 255, 0.18); color: #2997ff; border: 1px solid rgba(41, 151, 255, 0.35);">
+                DAS HANDWERKSZEUG IM KOPF
+              </div>
+              <div class="card-title">Hard Skills &amp; Bildungswege</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Zahlen im Griff:</strong> Einnahmen, Ausgaben und Gewinn genau berechnen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Finanzieller Puffer:</strong> Wissen, ob am Monatsende genug Geld für Löhne &amp; Miete da ist</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Verträge &amp; Gesetze:</strong> Arbeitsverträge, Mietverträge und Vorschriften verstehen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Offene Bildungswege:</strong> Lehre, kaufmännische Ausbildung, Studium (BWL) oder Quereinstieg</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Erlernbares kaufmännisches Wissen
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-soft-skills">
+            <div>
+              <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(245, 166, 35, 0.18); color: #f5a623; border: 1px solid rgba(245, 166, 35, 0.35);">
+                DIE PERSÖNLICHKEIT IM HERZEN
+              </div>
+              <div class="card-title">Soft Skills &amp; Persönlichkeit</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Stressresistenz:</strong> Schlafen können und ruhig bleiben, auch wenn Probleme auftreten</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Menschenkenntnis:</strong> Souverän mit Banken, Kunden und Mitarbeitern verhandeln</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Mut zum Risiko:</strong> Entscheidungen treffen, auch wenn der Ausgang unsicher ist</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Disziplin &amp; Fleiß:</strong> Stetiges Durchhalten schlägt die bloße Idee</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-gold); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Charakter entscheidet über das Durchhalten
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 4: CHANCEN VS RISIKEN
+           ======================================================== -->
+      <div class="station" id="station-4">
+        <div class="station-header" id="header-station-4">
+          <h2 class="station-title">Chancen vs. Risiken</h2>
+          <div class="station-subtitle">Die ehrliche Realität des Unternehmertums</div>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-4">
+          
+          <div class="bento-card" id="card-chances">
+            <div>
+              <div class="icon-box" style="color: var(--apple-green); background: rgba(48, 209, 88, 0.12); border-color: rgba(48, 209, 88, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+              </div>
+              <div class="card-title" style="color: var(--apple-green);">Große Chancen</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot" style="color: var(--apple-green);">•</span> <span><strong>Gestaltungsfreiheit:</strong> Eigene Ideen direkt in die Tat umsetzen ohne Chef</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-green);">•</span> <span><strong>Wirtschaftlicher Hebel:</strong> Einkommen wächst mit dem Erfolg der Firma</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-green);">•</span> <span><strong>Bleibende Werte:</strong> Echtes Firmenvermögen &amp; Standorte für die Zukunft aufbauen</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-green);">•</span> <span><strong>Regionale Wirkung:</strong> Sichere Arbeits- und Ausbildungsplätze vor Ort schaffen</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-green); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Das eigene Schicksal selbst in die Hand nehmen
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-risks">
+            <div>
+              <div class="icon-box" style="color: var(--apple-red); background: rgba(255, 69, 58, 0.12); border-color: rgba(255, 69, 58, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              </div>
+              <div class="card-title" style="color: var(--apple-red);">Echte Risiken</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot" style="color: var(--apple-red);">•</span> <span><strong>Persönliche Haftung:</strong> Bei Krediten haftet man oft voll mit Privatvermögen</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-red);">•</span> <span><strong>Kein Sicherheitsnetz:</strong> Kein bezahlter Urlaub, kein Ausfallschutz bei Krankheit</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-red);">•</span> <span><strong>Ständiger Druck:</strong> Wirtschaftliche Schwankungen müssen selbst getragen werden</span></li>
+                <li><span class="bullet-dot" style="color: var(--apple-red);">•</span> <span><strong>Lange Bindung:</strong> Miet- und Pachtverträge über 10 bis 15 Jahre</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-red); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Verluste trägt der Unternehmer allein
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 5: PRAXIS-PORTRÄT: HELMUT PISTON
+           ======================================================== -->
+      <div class="station" id="station-5">
+        <div class="station-header" id="header-station-5">
+          <h2 class="station-title">Praxis-Porträt: Helmut Piston</h2>
+          <div class="station-subtitle">Vom Kaufmann zum regionalen Multi-Store-Unternehmer</div>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-5">
+          
+          <div class="bento-card" id="card-piston-profile">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(41, 151, 255, 0.18); color: #2997ff; border: 1px solid rgba(41, 151, 255, 0.35);">
+                WERDEGANG &amp; WACHSTUM
+              </div>
+              <div class="card-title">Werdegang &amp; Unternehmensgruppe</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Wurzeln:</strong> Selbstständiger Kaufmann aus Leidenschaft in Nordbaden</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Wachstum:</strong> Vom einzelnen Markt zur starken Piston-Gruppe mit über 500 Mitarbeitern</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Großfläche:</strong> Betreibt u. a. das moderne E-Center Piston in Böblingen-Hulb</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Pioniergeist:</strong> Vorreiter bei modernen Shop-in-Shop-Konzepten &amp; Frischewelten</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Über 500 Mitarbeiter in der Region
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-piston-motto">
+            <div>
+              <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(245, 166, 35, 0.18); color: #f5a623; border: 1px solid rgba(245, 166, 35, 0.35);">
+                DIE PHILOSOPHIE
+              </div>
+              <div class="card-title">„Menschen muss man mögen“</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Zentraler Leitsatz:</strong> Unternehmertum ist kein kaltes Rechnen, sondern Beziehungsarbeit</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Kundenfokus:</strong> Echter Service und regionale Verbundenheit als Kern des Erfolgs</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Mitarbeiterkultur:</strong> Wertschätzung, eigene Ausbildung und sichere Arbeitsplätze</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Heimat:</strong> Enge Partnerschaften mit regionalen Erzeugern und Vereinen</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-gold); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Erfolg durch Vertrauen und Wertschätzung
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 6: DAS GESCHÄFTSMODELL (DIE 3 SÄULEN VON HELMUT PISTON)
+           ======================================================== -->
+      <div class="station" id="station-6">
+        <div class="station-header" id="header-station-6">
+          <h2 class="station-title">Das Geschäftsmodell: Die 3 Säulen</h2>
+          <div class="station-subtitle">Risikostreuung &amp; Diversifikation im Handel</div>
+        </div>
+        <div class="bento-grid grid-3" id="grid-station-6">
+          
+          <!-- Säule 1: EDEKA -->
+          <div class="bento-card" id="card-piston-edeka">
+            <div>
+              <div class="card-image-slot">
+                <img src="./images/edeka.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'150\' viewBox=\'0 0 300 150\'><rect width=\'300\' height=\'150\' fill=\'%23004b93\'/><text x=\'50%25\' y=\'55%25\' font-family=\'sans-serif\' font-size=\'32\' font-weight=\'bold\' fill=\'%23f9d616\' text-anchor=\'middle\'>EDEKA PISTON</text></svg>';" alt="Edeka Piston">
+              </div>
+              <div class="badge" style="background: rgba(0, 112, 210, 0.2); color: #2997ff; border: 1px solid rgba(0, 112, 210, 0.4);">
+                SÄULE 1 • GENOSSENSCHAFT
+              </div>
+              <div class="card-title">Edeka Piston</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Rechtsform:</strong> Selbstständiger Kaufmann (e.K.)</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Einkaufsmacht:</strong> Rückhalt im genossenschaftlichen Edeka-Verbund</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Autonomie:</strong> Freie Preis- &amp; Sortimentsgestaltung vor Ort</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Systemstärke trifft lokalen Kaufmann
+            </div>
+          </div>
+
+          <!-- Säule 2: ZOO & CO -->
+          <div class="bento-card" id="card-piston-zooco">
+            <div>
+              <div class="card-image-slot">
+                <img src="./images/zooco.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'150\' viewBox=\'0 0 300 150\'><rect width=\'300\' height=\'150\' fill=\'%23b45309\'/><text x=\'50%25\' y=\'55%25\' font-family=\'sans-serif\' font-size=\'28\' font-weight=\'bold\' fill=\'%23ffffff\' text-anchor=\'middle\'>ZOO &amp; Co. PISTON</text></svg>';" alt="Zoo & Co Piston">
+              </div>
+              <div class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">
+                SÄULE 2 • FRANCHISE
+              </div>
+              <div class="card-title">Zoo &amp; Co.</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Fachmarkt:</strong> Spezialist für Heimtierbedarf (SAGAFLOR AG)</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Verbandsarbeit:</strong> Helmut Piston ist Mitglied im Aufsichtsrat</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Diversifikation:</strong> Risikostreuung außerhalb des Food-Sektors</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-gold); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Skalierung durch Partnerschaft
+            </div>
+          </div>
+
+          <!-- Säule 3: GÖPI -->
+          <div class="bento-card" id="card-piston-goepi">
+            <div>
+              <div class="card-image-slot">
+                <img src="./images/goepi.jpg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'150\' viewBox=\'0 0 300 150\'><rect width=\'300\' height=\'150\' fill=\'%23065f46\'/><text x=\'50%25\' y=\'55%25\' font-family=\'sans-serif\' font-size=\'32\' font-weight=\'bold\' fill=\'%2334d399\' text-anchor=\'middle\'>GÖPI KETTE</text></svg>';" alt="GöPi Kette">
+              </div>
+              <div class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);">
+                SÄULE 3 • EIGENE MARKE
+              </div>
+              <div class="card-title">Kette „GöPi“</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Bio-Märkte:</strong> Regionale Bio-Fachmarktkette in Nordbaden</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Freiheit:</strong> Unabhängige Standort- &amp; Expansionspolitik</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Wertschöpfung:</strong> Volle Ertrags- &amp; Markenkontrolle</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-green); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Maximale unternehmerische Identität
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 7: EXPERTENINTERVIEW MIT HELMUT PISTON
+           ======================================================== -->
+      <div class="station" id="station-7">
+        <div class="station-header" id="header-station-7">
+          <h2 class="station-title">Experteninterview: Helmut Piston</h2>
+          <div class="station-subtitle">Empirische Primärforschung für das P-Seminar</div>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-7">
+          
+          <div class="bento-card" id="card-interview-status">
+            <div>
+              <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/></svg>
+              </div>
+              <div class="badge" style="background: rgba(245, 166, 35, 0.2); color: #fbbf24; border: 1px solid rgba(245, 166, 35, 0.4);">
+                [ IN VORBEREITUNG FÜR DIE PFINGSTFERIEN ]
+              </div>
+              <div class="card-title" style="font-size: 1.85rem; margin-bottom: 14px;">Vor-Ort-Termin vereinbart</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>Empirische Methodik:</strong> Wissenschaftliches Tiefeninterview</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Vor-Ort-Einblick:</strong> Hinter den Kulissen der Unternehmensgruppe</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Theorieabgleich:</strong> Praktische Überprüfung der Seminar-Thesen</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-gold); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Exklusiver Praxis-Einblick aus erster Hand
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-interview-questions">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M19 2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 16h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 11.9 13 12.5 13 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/></svg>
+              </div>
+              <div class="card-title">Die 4 Kernfragen des Leitfadens</div>
+              <ul class="bullet-list">
+                <li><span class="bullet-dot">•</span> <span><strong>1. Gründungsimpuls:</strong> Der Schritt zum Multi-Filialisten</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>2. Systemvergleich:</strong> Genossenschaft vs. Franchise vs. Eigenmarke</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>3. Krisenresilienz:</strong> Strategien gegen Kosten &amp; Personalmangel</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>4. Praxisrat:</strong> Unverzichtbare Fähigkeiten für Schulabgänger</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Vollständige Auswertung folgt im Kolloquium
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 8: FAZIT & KERNBOTSCHAFT
+           ======================================================== -->
+      <div class="station" id="station-8">
+        <div class="station-header" id="header-station-8">
+          <h2 class="station-title">Fazit &amp; Eigene Perspektive</h2>
+        </div>
+        <div class="bento-grid grid-2" id="grid-station-8">
+          
+          <div class="bento-card" id="card-conclusion-reflection">
+            <div>
+              <div class="icon-box" style="color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.25);">
+                <svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+              </div>
+              <div class="card-title">Warum Unternehmertum?</div>
+              <ul class="bullet-list" style="gap: 16px; margin-top: 10px;">
+                <li><span class="bullet-dot">•</span> <span><strong>Selbstbestimmung:</strong> Reale Werte &amp; Arbeitsplätze schaffen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Eigenverantwortung:</strong> Das System selbst lenken statt Befehle ausführen</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Kaufmännisches Handwerk:</strong> Solide Bilanzen statt schneller Spekulation</span></li>
+                <li><span class="bullet-dot">•</span> <span><strong>Ausdauer:</strong> Stetiges Durchhalten entscheidet über den Erfolg</span></li>
+              </ul>
+            </div>
+            <div style="color: var(--apple-blue); font-size: 0.95rem; font-weight: 600; margin-top: 18px;">
+              Verantwortung als größter Antrieb
+            </div>
+          </div>
+
+          <div class="bento-card" id="card-conclusion-quote" style="border-color: rgba(245, 166, 35, 0.5); justify-content: center; text-align: center; padding: 40px;">
+            <div class="icon-box" style="color: var(--apple-gold); background: rgba(245, 166, 35, 0.12); border-color: rgba(245, 166, 35, 0.25); margin: 0 auto 18px auto;">
+              <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            </div>
+            <h3 style="font-size: 1.85rem; font-weight: 700; line-height: 1.35; color: var(--text-white); margin-bottom: 16px;">
+              „Erfolg entsteht nicht durch die beste Idee, sondern durch die ausdauerndste Umsetzung.“
+            </h3>
+            <div style="color: var(--apple-gold); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;">KERNBOTSCHAFT</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STATION 9: ENDFOLIE (HABT IHR NOCH FRAGEN?)
+           ======================================================== -->
+      <div class="station" id="station-9">
+        <div style="max-width: 900px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+          <div class="icon-box" style="width: 64px; height: 64px; border-radius: 18px; color: var(--apple-blue); background: rgba(41, 151, 255, 0.12); border-color: rgba(41, 151, 255, 0.3); margin-bottom: 24px;">
+            <svg style="width: 32px; height: 32px;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>
+          </div>
+          <h1 style="font-size: 5.4rem; font-weight: 800; letter-spacing: -0.04em; color: var(--text-white); margin-bottom: 20px; line-height: 1.1;">
+            Habt ihr noch Fragen?
+          </h1>
+          <p style="font-size: 1.6rem; color: var(--text-secondary); max-width: 600px; font-weight: 400;">
+            Vielen Dank für eure Aufmerksamkeit
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OVERVIEW HIT OVERLAY: 100% Reliable Click Targets on Mac & iPad -->
+  <div class="overview-hit-overlay" id="overviewOverlay">
+    <div class="overview-grid-map">
+      <button class="overview-tile-btn" data-station="station-1">
+        <span class="num">Station 1</span>
+        <strong>Was ist ein Unternehmer?</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-2">
+        <span class="num">Station 2</span>
+        <strong>Die 3 Rollen im Alltag</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-3">
+        <span class="num">Station 3</span>
+        <strong>Hard Skills vs. Soft Skills</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-4">
+        <span class="num">Station 4</span>
+        <strong>Chancen vs. Risiken</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-5">
+        <span class="num">Station 5</span>
+        <strong>Porträt: Helmut Piston</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-6">
+        <span class="num">Station 6</span>
+        <strong>Die 3 Säulen von Piston</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-7">
+        <span class="num">Station 7</span>
+        <strong>Experteninterview</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-8">
+        <span class="num">Station 8</span>
+        <strong>Fazit &amp; Kernbotschaft</strong>
+      </button>
+      <button class="overview-tile-btn" data-station="station-9">
+        <span class="num">Station 9</span>
+        <strong>Endfolie: Fragerunde</strong>
+      </button>
+    </div>
+  </div>
+
+  <!-- FLOATING HUD BAR (Apple Dock with Hover Pop-up) -->
+  <div class="hud-trigger-zone" id="hudTriggerZone"></div>
+  <div class="hud-bar" id="hudBar">
+    <button class="hud-btn" id="prevBtn" title="Zurück (←)">←</button>
+    <div class="hud-counter" id="beatCounter" title="Klicken für Übersicht">1 / 27</div>
+    <button class="hud-btn" id="nextBtn" title="Weiter (→ / Leertaste / Tippen)">→</button>
+    <div class="hud-divider"></div>
+    <button class="hud-pill highlight always-show" id="presenterBtn" title="Referentenansicht in separatem Fenster öffnen (P)">Referentenansicht (P)</button>
+    <button class="hud-pill always-show" id="notesBtn" title="Sprechzettel / Notizen einblenden (N)">Notizen (N)</button>
+    <button class="hud-pill always-show" id="overviewBtn" title="3D-Matrix Vogelperspektive (O)">Übersicht (O)</button>
+    <button class="hud-pill" id="fsBtn" title="Vollbild (F)">Vollbild (F)</button>
+  </div>
+
+  <!-- INTEGRATED PRESENTATION NOTES MODAL (For iPad & Mac Single-Screen) -->
+  <div class="notes-overlay" id="notesOverlay">
+    <div class="notes-card">
+      <h2>
+        <span id="notesBeatTitle">Beat 1: Prolog</span>
+        <button class="hud-pill" id="closeNotesBtn">Schließen (Esc)</button>
+      </h2>
+      <div class="notes-box">
+        <h4>Sprechgedanke &amp; Moderation</h4>
+        <p id="notesSpokenText"></p>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="hud-pill" id="notesModalPrev">← Zurück</button>
+        <span style="color: var(--text-dim); font-size: 0.9rem;" id="notesModalCounter">Beat 1 / 27</span>
+        <button class="hud-pill highlight" id="notesModalNext">Weiter →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const world = document.getElementById('world');
+    const glow1 = document.getElementById('ambientGlow1');
+    const glow2 = document.getElementById('ambientGlow2');
+    const beatCounter = document.getElementById('beatCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    const closeNotesBtn = document.getElementById('closeNotesBtn');
+    const notesOverlay = document.getElementById('notesOverlay');
+    const overviewBtn = document.getElementById('overviewBtn');
+    const overviewOverlay = document.getElementById('overviewOverlay');
+    const presenterBtn = document.getElementById('presenterBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const touchPrev = document.getElementById('touchPrev');
+    const touchNext = document.getElementById('touchNext');
+
+    let currentBeat = 0;
+    let isOverview = false;
+    let activeGlowSlot = 1; // Alternates between 1 and 2 for seamless crossfading
+
+    // Dual-Screen Synchronization via Native BroadcastChannel
+    let syncChannel = null;
+    try {
+      syncChannel = new BroadcastChannel('p-seminar-sync');
+      syncChannel.onmessage = (event) => {
+        const data = event.data;
+        if (!data) return;
+        if (data.type === 'GO_TO_BEAT' && typeof data.index === 'number') {
+          applyBeat(data.index, true);
+        } else if (data.type === 'NEXT') {
+          nextBeat(true);
+        } else if (data.type === 'PREV') {
+          prevBeat(true);
+        } else if (data.type === 'TOGGLE_OVERVIEW') {
+          toggleOverview();
+        } else if (data.type === 'REQUEST_STATE') {
+          broadcastCurrentState();
+        }
+      };
+    } catch (e) {
+      console.warn("BroadcastChannel not supported", e);
+    }
+
+    function broadcastCurrentState() {
+      if (!syncChannel) return;
+      syncChannel.postMessage({
+        type: 'STATE_UPDATE',
+        currentBeat: currentBeat,
+        totalBeats: beats.length,
+        isOverview: isOverview,
+        beat: beats[currentBeat],
+        nextBeat: beats[currentBeat + 1] || null
+      });
+    }
+
+    // 27 Master Beats: Mit starkem Zoom (z: 230 für Kacheln) und knackigen Stichpunkten für den Referenten
+    const beats = [
+      // ========================================================
+      // 1. STATION 1: PROLOG & GRUNDDEFINITION
+      // ========================================================
+      {
+        camera: { x: 0, y: 0, z: -50, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.35)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Prolog",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Prolog: Der Unternehmer",
+        spoken: "• <b>Begrüßung:</b> Herzlich willkommen zu meiner Präsentation<br>• <b>Thema:</b> Das Berufsbild des Unternehmers<br>• <b>Leitgedanke:</b> Zwischen strategischer Vision, vollem Risiko und echter Verantwortung"
+      },
+      {
+        camera: { x: 290, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Grunddefinition",
+        headerMode: 'dimmed',
+        activeCard: 'card-s1-definition',
+        title: "Was ist ein Unternehmer?",
+        spoken: "• <b>Eigene Firma:</b> Gründet oder übernimmt einen eigenständigen Betrieb<br>• <b>Selbstverwaltung:</b> Trifft alle Entscheidungen autonom – kein Chef über ihm<br>• <b>Volles Risiko:</b> Gewinn oder Verlust liegen zu 100% in eigener Hand<br>• <b>Ziel:</b> Dauerhaft Werte &amp; Arbeitsplätze schaffen statt reiner Stundenlohn"
+      },
+      {
+        camera: { x: -290, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Der Vergleich",
+        headerMode: 'dimmed',
+        activeCard: 'card-s1-comparison',
+        title: "Unternehmer vs. Angestellter",
+        spoken: "• <b>Angestellter:</b> Festes Gehalt, geregelte Arbeitszeiten, klare Vorgaben vom Chef<br>• <b>Unternehmer:</b> Kein garantiertes Monatseinkommen, keine Stechuhr, volle Haftung<br>• <b>Freiheit &amp; Druck:</b> Maximale Selbstbestimmung bei gleichzeitig maximaler Eigenverantwortung"
+      },
+
+      // ========================================================
+      // 2. STATION 2: DAS BERUFSBILD (DIE 3 ROLLEN IM ALLTAG)
+      // ========================================================
+      {
+        camera: { x: -2600, y: 0, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.32)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Das Berufsbild im Alltag",
+        spoken: "• <b>Die Kernfrage:</b> Was macht ein Unternehmer eigentlich den ganzen Tag?<br>• <b>Kein Monoton-Job:</b> Kein klassischer Schreibtischalltag mit festen Abläufen<br>• <b>Dreiklang:</b> Vereint täglich 3 völlig unterschiedliche Rollen gleichzeitig"
+      },
+      {
+        camera: { x: -2220, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-strategist',
+        title: "Rolle 1: Der Stratege",
+        spoken: "• <b>Zukunftsplan:</b> Wo soll die Firma in 3 bis 5 Jahren stehen?<br>• <b>Markt &amp; Angebote:</b> Neue Produkte, Dienstleistungen oder Standorte entwickeln<br>• <b>Wettbewerb:</b> Konkurrenz beobachten und eigene Stärken ausbauen<br>• <b>Investitionen:</b> Gezielter Einsatz von Kapital für Maschinen, Software oder Räume"
+      },
+      {
+        camera: { x: -2600, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-crisis',
+        title: "Rolle 2: Der Krisenmanager (60h+)",
+        spoken: "• <b>Akute Notfälle:</b> Lieferausfälle, Kostenexplosionen oder abspringende Großkunden<br>• <b>Kein Feierabend:</b> Probleme landen immer auf dem Tisch des Chefs<br>• <b>Sofortige Lösungen:</b> Schnelle Entscheidungen unter hohem Druck treffen<br>• <b>Arbeitslast:</b> Häufig 60+ Wochenstunden – ständige Erreichbarkeit"
+      },
+      {
+        camera: { x: -2980, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(48, 209, 88, 0.45)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-leader',
+        title: "Rolle 3: Die Führungskraft (100%)",
+        spoken: "• <b>Teamaufbau:</b> Die passenden Mitarbeiter einstellen, motivieren und halten<br>• <b>Vorbildfunktion:</b> Fairness, Verlässlichkeit und Vertrauen vorleben<br>• <b>Löhne:</b> Pünktliche und faire Bezahlung der Belegschaft sicherstellen<br>• <b>100% Pflicht:</b> Soziale Verantwortung für Mitarbeiter und Familien"
+      },
+
+      // ========================================================
+      // 3. STATION 3: HARD SKILLS VS. SOFT SKILLS
+      // ========================================================
+      {
+        camera: { x: -5200, y: 0, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.32)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Qualifikationen: Hard & Soft Skills",
+        spoken: "• <b>Einstiegsfrage:</b> Wie wird man überhaupt Unternehmer?<br>• <b>Kopf vs. Charakter:</b> Fachliches Handwerkszeug (Hard) trifft Persönlichkeit (Soft)<br>• <b>Die Formel:</b> Hard Skills braucht man zum Steuern – Soft Skills zum Durchhalten"
+      },
+      {
+        camera: { x: -4910, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'dimmed',
+        activeCard: 'card-hard-skills',
+        title: "Hard Skills & Bildungswege",
+        spoken: "• <b>Zahlen im Blick:</b> Einnahmen, Ausgaben und Gewinn genau berechnen können<br>• <b>Finanzieller Puffer:</b> Immer wissen, ob genug Geld für Miete und Gehälter da ist<br>• <b>Verträge &amp; Gesetze:</b> Arbeitsverträge, Mietverträge und Vorschriften verstehen<br>• <b>Bildungswege:</b> Kein fester Pfad – Lehre, Studium (z. B. BWL) oder Quereinstieg"
+      },
+      {
+        camera: { x: -5490, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'dimmed',
+        activeCard: 'card-soft-skills',
+        title: "Soft Skills & Persönlichkeit",
+        spoken: "• <b>Stressresistenz:</b> Schlafen können und ruhig bleiben, auch wenn es brennt<br>• <b>Menschenkenntnis:</b> Überzeugend mit Banken, Kunden und Partnern verhandeln<br>• <b>Mut zum Risiko:</b> Entscheidungen treffen, auch wenn die Zukunft unsicher ist<br>• <b>Disziplin &amp; Fleiß:</b> Durchhalten, wenn die erste Motivation nachlässt"
+      },
+
+      // ========================================================
+      // 4. STATION 4: CHANCEN VS. RISIKEN
+      // ========================================================
+      {
+        camera: { x: -5200, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(255, 255, 255, 0.22)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Chancen vs. Risiken",
+        spoken: "• <b>Ehrlicher Blick:</b> Nüchterne Abwägung der Licht- und Schattenseiten<br>• <b>Realitätscheck:</b> Unternehmertum bietet enorme Freiheiten, aber keinen Schutzraum"
+      },
+      {
+        camera: { x: -4910, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(48, 209, 88, 0.48)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'dimmed',
+        activeCard: 'card-chances',
+        title: "Große Chancen",
+        spoken: "• <b>Freiheit:</b> Eigene Ideen direkt verwirklichen ohne Vorgesetzte<br>• <b>Finanzieller Hebel:</b> Einkommen wächst mit dem Erfolg der Firma – keine Grenze nach oben<br>• <b>Bleibende Werte:</b> Ein echtes Unternehmen und dauerhafte Sachwerte aufbauen<br>• <b>Gesellschaftlicher Beitrag:</b> Echte Ausbildungs- und Arbeitsplätze vor Ort schaffen"
+      },
+      {
+        camera: { x: -5490, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(255, 69, 58, 0.48)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'dimmed',
+        activeCard: 'card-risks',
+        title: "Echte Risiken",
+        spoken: "• <b>Persönliche Haftung:</b> Im Ernstfall haftet man oft mit dem eigenen Privatvermögen<br>• <b>Kein Sicherheitsnetz:</b> Kein bezahlter Urlaub, kein bezahltes Krankengeld, kein Kündigungsschutz<br>• <b>Hoher Druck:</b> Ständige Ungewissheit über Aufträge und Marktlage<br>• <b>Verlustrisiko:</b> Wenn die Firma scheitert, drohen Schulden statt Gehalt"
+      },
+
+      // ========================================================
+      // 5. STATION 5: PRAXIS-PORTRÄT: HELMUT PISTON
+      // ========================================================
+      {
+        camera: { x: -2600, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.38)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Praxis-Porträt: Helmut Piston",
+        spoken: "• <b>Theorie trifft Praxis:</b> Konkreter Blick auf einen echten regionalen Unternehmer<br>• <b>Persönlichkeit:</b> Helmut Piston aus der Region Nordbaden / Karlsruhe / Böblingen<br>• <b>Erfolgsweg:</b> Vom klassischen Kaufmann zum erfolgreichen Multi-Store-Inhaber"
+      },
+      {
+        camera: { x: -2310, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.52)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-profile',
+        title: "Werdegang & Unternehmensgruppe",
+        spoken: "• <b>Wurzeln:</b> Kaufmann aus Leidenschaft in der Region Karlsruhe und Böblingen<br>• <b>Wachstum:</b> Vom einzelnen Geschäft zur Piston-Gruppe mit über 500 Mitarbeitern<br>• <b>Großfläche:</b> Betreibt u. a. das große E-Center Piston in Böblingen-Hulb<br>• <b>Innovation:</b> Vorreiter bei modernen Shop-in-Shop-Formaten und Frischekonzepten"
+      },
+      {
+        camera: { x: -2890, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-motto',
+        title: "Philosophie: „Menschen muss man mögen“",
+        spoken: "• <b>Sein Leitsatz:</b> „Menschen muss man mögen“ als zentraler Unternehmenskompass<br>• <b>Erfolgsgeheimnis:</b> Unternehmertum ist kein kaltes Rechnen, sondern Beziehungsarbeit<br>• <b>Teamkultur:</b> Große Wertschätzung, eigene Ausbildung und sichere Arbeitsplätze<br>• <b>Regionale Nähe:</b> Aktive Unterstützung für lokale Vereine und regionale Lieferanten"
+      },
+
+      // ========================================================
+      // 6. STATION 6: DAS GESCHÄFTSMODELL (DIE 3 SÄULEN)
+      // ========================================================
+      {
+        camera: { x: 0, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.35)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Das Geschäftsmodell: Die 3 Säulen",
+        spoken: "• <b>Diversifikation:</b> Wie sichert Helmut Piston seine Unternehmensgruppe ab?<br>• <b>Risikostreuung:</b> Er setzt auf 3 grundlegend verschiedene Systeme im Handel"
+      },
+      {
+        camera: { x: 380, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.52)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-edeka',
+        title: "Säule 1: Edeka Piston",
+        spoken: "• <b>Modell:</b> Selbstständiger Kaufmann (e.K.) im Edeka-Genossenschaftsverbund<br>• <b>Vorteil:</b> Riesige gemeinsame Einkaufskraft und Logistik im Hintergrund<br>• <b>Autonomie:</b> Volle Freiheit bei Sortimentsgestaltung, Preisen und Personal vor Ort"
+      },
+      {
+        camera: { x: 0, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-zooco',
+        title: "Säule 2: Zoo & Co.",
+        spoken: "• <b>Fachmarkt:</b> Spezialist für Tierbedarf im Franchise-Netzwerk der SAGAFLOR AG<br>• <b>Verbandsarbeit:</b> Helmut Piston sitzt aktiv im Aufsichtsrat der SAGAFLOR AG<br>• <b>Synergie:</b> Risikostreuung außerhalb des klassischen Lebensmittelmarktes"
+      },
+      {
+        camera: { x: -380, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(16, 185, 129, 0.48)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-goepi',
+        title: "Säule 3: Kette GöPi",
+        spoken: "• <b>Eigenmarke:</b> Eigene Kette für Bio-Supermärkte (Karlsruhe, Ettlingen, Straubenhardt)<br>• <b>Unabhängigkeit:</b> 100% eigene Marke und vollständige Entscheidungsfreiheit<br>• <b>Zukunftstrend:</b> Frühe Positionierung im Wachstumsmarkt für ökologische Ernährung"
+      },
+
+      // ========================================================
+      // 7. STATION 7: EXPERTENINTERVIEW MIT HELMUT PISTON
+      // ========================================================
+      {
+        camera: { x: 0, y: -4400, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.35)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Experteninterview: Helmut Piston",
+        spoken: "• <b>Empirischer Kern:</b> Tiefeninterview mit Helmut Piston als Herzstück des P-Seminars<br>• <b>Ziel:</b> Echte Einblicke hinter die Kulissen statt trockener Schulbuchtheorie"
+      },
+      {
+        camera: { x: 290, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'dimmed',
+        activeCard: 'card-interview-status',
+        title: "Termin: Pfingstferien",
+        spoken: "• <b>Zeitplan:</b> Fester Vor-Ort-Termin für die kommenden Pfingstferien vereinbart<br>• <b>Format:</b> Strukturiertes persönliches Leitfaden-Interview vor Ort<br>• <b>Ergebnis:</b> Detaillierte Fallstudie für meine P-Seminar-Arbeit und das Kolloquium"
+      },
+      {
+        camera: { x: -290, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'dimmed',
+        activeCard: 'card-interview-questions',
+        title: "Die 4 Kernfragen des Leitfadens",
+        spoken: "• <b>1. Gründungsimpuls:</b> Was gab den Anstoß für den Schritt in die Selbstständigkeit?<br>• <b>2. Systemvergleich:</b> Wie unterscheiden sich Genossenschaft, Franchise und Eigenmarke in der Praxis?<br>• <b>3. Krisenresilienz:</b> Wie meistert man Lieferkrisen und Energiekostenexplosionen?<br>• <b>4. Ratschlag:</b> Welche Fähigkeiten empfiehlt er jungen Menschen heute fürs Unternehmertum?"
+      },
+
+      // ========================================================
+      // 8. STATION 8: FAZIT & KERNBOTSCHAFT
+      // ========================================================
+      {
+        camera: { x: -2600, y: -4400, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.35)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Fazit & Eigene Perspektive",
+        spoken: "• <b>Mein Resümee:</b> Was nehme ich aus der Vorbereitung und Recherche mit?<br>• <b>Erkenntnis:</b> Unternehmertum ist kein Glücksspiel, sondern anspruchsvolles Handwerk"
+      },
+      {
+        camera: { x: -2310, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'dimmed',
+        activeCard: 'card-conclusion-reflection',
+        title: "Warum Unternehmertum?",
+        spoken: "• <b>Selbstbestimmung:</b> Nicht nur Rädchen im Getriebe sein – das Getriebe selbst bauen<br>• <b>Verantwortung:</b> Stolz darauf sein, echte Arbeitsplätze zu sichern und Werte zu schaffen<br>• <b>Perspektive:</b> Ein extrem fordernder, aber erfüllender und selbstbestimmter Lebensweg"
+      },
+      {
+        camera: { x: -2890, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.55)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'dimmed',
+        activeCard: 'card-conclusion-quote',
+        title: "Die Kernbotschaft",
+        spoken: "• <b>Leitspruch:</b> „Erfolg entsteht nicht durch die beste Idee...“<br>• <b>Sondern:</b> „...sondern durch die ausdauerndste Umsetzung.“<br>• <b>Haltung:</b> Jeden Tag aufstehen, Probleme lösen und für das Team da sein"
+      },
+
+      // ========================================================
+      // 9. STATION 9: ENDFOLIE (HABT IHR NOCH FRAGEN?)
+      // ========================================================
+      {
+        camera: { x: -5200, y: -4400, z: 0, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.45)',
+        stationId: 'station-9',
+        stationName: "Station 9 • Fragen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Habt ihr noch Fragen?",
+        spoken: "• <b>Abschluss:</b> Vielen Dank für eure Aufmerksamkeit!<br>• <b>Diskussion:</b> Ich freue mich jetzt auf eure Fragen zum Berufsbild oder zu Helmut Piston!"
+      }
+    ];
+
+    function applyBeat(index, emitSync = true) {
+      if (index < 0 || index >= beats.length) return;
+      currentBeat = index;
+
+      if (isOverview) closeOverview();
+
+      const beat = beats[currentBeat];
+
+      // Smooth 3D Camera Glide
+      const c = beat.camera;
+      world.style.transform = `translate3d(${c.x}px, ${c.y}px, ${c.z}px) rotateX(${c.rotX}deg) rotateY(${c.rotY}deg)`;
+
+      // Butter-Smooth Color Morph (Dual-Layer Opacity Cross-Fade: ZERO Blinking!)
+      if (activeGlowSlot === 1) {
+        glow2.style.background = `radial-gradient(circle, ${beat.glow}, transparent 70%)`;
+        glow2.style.opacity = '1';
+        glow1.style.opacity = '0';
+        activeGlowSlot = 2;
+      } else {
+        glow1.style.background = `radial-gradient(circle, ${beat.glow}, transparent 70%)`;
+        glow1.style.opacity = '1';
+        glow2.style.opacity = '0';
+        activeGlowSlot = 1;
+      }
+
+      // Special handling for Station 1 Title Elements
+      const s1Eyebrow = document.getElementById('s1-eyebrow');
+      const s1Subtitle = document.getElementById('s1-subtitle');
+      const s1Title = document.getElementById('s1-title');
+
+      if (beat.stationId === 'station-1') {
+        if (beat.headerMode === 'focus-title-only') {
+          s1Eyebrow.style.opacity = '0.15';
+          s1Subtitle.style.opacity = '0.15';
+          s1Title.style.transform = 'scale(1.06)';
+          s1Title.style.textShadow = '0 0 50px rgba(41, 151, 255, 0.4)';
+        } else {
+          s1Eyebrow.style.opacity = '0.75';
+          s1Subtitle.style.opacity = '0.65';
+          s1Title.style.transform = 'scale(1)';
+          s1Title.style.textShadow = 'none';
+        }
+      }
+
+      // Handle Station Headers (Dim vs Focus)
+      document.querySelectorAll('.station-header').forEach(header => {
+        const parentStation = header.closest('.station');
+        if (parentStation && parentStation.id === beat.stationId) {
+          if (beat.headerMode === 'focus') {
+            header.classList.add('header-focused');
+            header.classList.remove('header-dimmed');
+          } else {
+            header.classList.add('header-dimmed');
+            header.classList.remove('header-focused');
+          }
+        } else {
+          header.classList.remove('header-focused', 'header-dimmed');
+        }
+      });
+
+      // Handle Bento Cards (Spotlight vs 8px Heavy Blur Dimmed)
+      document.querySelectorAll('.bento-card').forEach(card => {
+        const parentStation = card.closest('.station');
+        if (parentStation && parentStation.id === beat.stationId) {
+          if (beat.activeCard) {
+            if (card.id === beat.activeCard) {
+              card.classList.add('active-spotlight');
+              card.classList.remove('dimmed');
+            } else {
+              card.classList.add('dimmed');
+              card.classList.remove('active-spotlight');
+            }
+          } else {
+            // Header is focused, dim all cards in this station
+            card.classList.add('dimmed');
+            card.classList.remove('active-spotlight');
+          }
+        } else {
+          card.classList.remove('active-spotlight', 'dimmed');
+        }
+      });
+
+      // Update HUD
+      beatCounter.textContent = `${currentBeat + 1} / ${beats.length}`;
+      document.getElementById('notesBeatTitle').textContent = `Beat ${currentBeat + 1}: ${beat.title}`;
+      document.getElementById('notesSpokenText').innerHTML = beat.spoken;
+      document.getElementById('notesModalCounter').textContent = `Beat ${currentBeat + 1} / ${beats.length}`;
+
+      if (emitSync) broadcastCurrentState();
+    }
+
+    function nextBeat(emitSync = true) {
+      if (currentBeat < beats.length - 1) {
+        applyBeat(currentBeat + 1, emitSync);
+      }
+    }
+
+    function prevBeat(emitSync = true) {
+      if (currentBeat > 0) {
+        applyBeat(currentBeat - 1, emitSync);
+      }
+    }
+
+    function toggleOverview() {
+      if (isOverview) {
+        closeOverview();
+      } else {
+        openOverview();
+      }
+    }
+
+    function openOverview() {
+      isOverview = true;
+      document.body.classList.add('is-overview');
+      world.classList.add('overview-mode');
+      overviewBtn.classList.add('highlight');
+      overviewBtn.textContent = 'Fokus (Esc)';
+      broadcastCurrentState();
+    }
+
+    function closeOverview() {
+      isOverview = false;
+      document.body.classList.remove('is-overview');
+      world.classList.remove('overview-mode');
+      overviewBtn.classList.remove('highlight');
+      overviewBtn.textContent = 'Übersicht (O)';
+      applyBeat(currentBeat, true);
+    }
+
+    function openPresenterWindow() {
+      const presenterWin = window.open('presenter.html', 'PresenterWindow', 'width=1150,height=800,menubar=no,toolbar=no,location=no');
+      if (presenterWin) {
+        presenterWin.focus();
+      } else {
+        // Fallback for pop-up blockers: open in-page notes
+        notesOverlay.classList.add('show');
+      }
+    }
+
+    function toggleFullscreen() {
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFs) {
+        const root = document.documentElement;
+        if (root.requestFullscreen) {
+          root.requestFullscreen().catch(() => {});
+        } else if (root.webkitRequestFullscreen) {
+          root.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    // Auto-reveal HUD Dock on mouse movement near bottom (within 75px)
+    const hudBarElem = document.getElementById('hudBar') || document.querySelector('.hud-bar');
+    const hudTriggerElem = document.getElementById('hudTriggerZone');
+    let hudHideTimeout = null;
+
+    function revealHud(autoHide = true) {
+      if (!hudBarElem) return;
+      hudBarElem.classList.add('hud-visible');
+      clearTimeout(hudHideTimeout);
+      if (autoHide) {
+        hudHideTimeout = setTimeout(() => {
+          hudBarElem.classList.remove('hud-visible');
+        }, 3000);
+      }
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      if (e.clientY >= window.innerHeight - 75) {
+        revealHud(true);
+      }
+    });
+
+    if (hudTriggerElem) {
+      hudTriggerElem.addEventListener('mouseenter', () => revealHud(false));
+      hudTriggerElem.addEventListener('mouseleave', () => revealHud(true));
+    }
+    if (hudBarElem) {
+      hudBarElem.addEventListener('mouseenter', () => {
+        clearTimeout(hudHideTimeout);
+        hudBarElem.classList.add('hud-visible');
+      });
+      hudBarElem.addEventListener('mouseleave', () => revealHud(true));
+    }
+
+    // Briefly reveal HUD on start for 2.5s
+    revealHud(true);
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        nextBeat(true);
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        e.preventDefault();
+        prevBeat(true);
+      } else if (e.key.toLowerCase() === 'p') {
+        openPresenterWindow();
+      } else if (e.key.toLowerCase() === 'n') {
+        notesOverlay.classList.toggle('show');
+      } else if (e.key.toLowerCase() === 'o') {
+        toggleOverview();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        if (notesOverlay.classList.contains('show')) {
+          notesOverlay.classList.remove('show');
+        } else if (isOverview) {
+          closeOverview();
+        }
+      }
+    });
+
+    // iPad / Mobile Touch Gesture Support (Swipe Left / Swipe Right)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const deltaX = e.changedTouches[0].screenX - touchStartX;
+      const deltaY = e.changedTouches[0].screenY - touchStartY;
+      if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        if (deltaX < 0) {
+          nextBeat(true);
+        } else {
+          prevBeat(true);
+        }
+      }
+    }, { passive: true });
+
+    // Touch Hotspots (Left / Right Screen Edges)
+    touchNext.addEventListener('click', (e) => {
+      if (isOverview || notesOverlay.classList.contains('show')) return;
+      nextBeat(true);
+    });
+    touchPrev.addEventListener('click', (e) => {
+      if (isOverview || notesOverlay.classList.contains('show')) return;
+      prevBeat(true);
+    });
+
+    // HUD Buttons
+    nextBtn.addEventListener('click', () => nextBeat(true));
+    prevBtn.addEventListener('click', () => prevBeat(true));
+    beatCounter.addEventListener('click', toggleOverview);
+    overviewBtn.addEventListener('click', toggleOverview);
+    presenterBtn.addEventListener('click', openPresenterWindow);
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    notesBtn.addEventListener('click', () => notesOverlay.classList.add('show'));
+    closeNotesBtn.addEventListener('click', () => notesOverlay.classList.remove('show'));
+    notesOverlay.addEventListener('click', (e) => {
+      if (e.target === notesOverlay) notesOverlay.classList.remove('show');
+    });
+    document.getElementById('notesModalNext').addEventListener('click', () => nextBeat(true));
+    document.getElementById('notesModalPrev').addEventListener('click', () => prevBeat(true));
+
+    // Direct Jump via Overview Overlay Tiles
+    document.querySelectorAll('.overview-tile-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const stationId = btn.getAttribute('data-station');
+        const targetIdx = beats.findIndex(b => b.stationId === stationId);
+        if (targetIdx !== -1) {
+          closeOverview();
+          applyBeat(targetIdx, true);
+        }
+      });
+    });
+
+    // Direct Click on Station Cards in Normal Mode
+    document.querySelectorAll('.bento-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (isOverview) return;
+        const targetIdx = beats.findIndex(b => b.activeCard === card.id);
+        if (targetIdx !== -1) {
+          applyBeat(targetIdx, true);
+        }
+      });
+    });
+
+    // Initial Beat & State Broadcast
+    applyBeat(0, true);
+  </script>
+</body>
+</html>

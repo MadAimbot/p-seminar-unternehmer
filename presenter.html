@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Referentenansicht | Der Unternehmer (P-Seminar)</title>
+  <style>
+    :root {
+      --bg: #0d0d11;
+      --surface: #18181f;
+      --surface-border: rgba(255, 255, 255, 0.12);
+      --apple-blue: #2997ff;
+      --apple-gold: #f5a623;
+      --apple-green: #30d158;
+      --apple-red: #ff453a;
+      --text-white: #ffffff;
+      --text-secondary: #9e9ea7;
+      --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text-white);
+      font-family: var(--font-apple);
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP STATUS & TIMER BAR */
+    .top-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      box-sizing: border-box;
+      z-index: 100;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      color: var(--apple-green);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--apple-green);
+      box-shadow: 0 0 8px var(--apple-green);
+    }
+
+    .clock-display {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* TIMER CONTROLS */
+    .timer-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--surface-border);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+    .timer-digits {
+      font-size: 1.35rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--apple-blue);
+      min-width: 70px;
+      text-align: center;
+    }
+    .timer-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-white);
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .timer-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* MAIN PRESENTER GRID (Fits 100% into 100vh) */
+    .presenter-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+      padding: 14px 20px;
+      height: calc(100vh - 52px);
+      max-width: 1650px;
+      margin: 0 auto;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* CARDS */
+    .p-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-sizing: border-box;
+    }
+    .p-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+    .p-card-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--apple-blue);
+      font-weight: 700;
+    }
+
+    /* CURRENT SLIDE PREVIEW */
+    .current-beat-hero {
+      background: linear-gradient(135deg, rgba(41, 151, 255, 0.12), transparent);
+      border-color: rgba(41, 151, 255, 0.35);
+    }
+    .slide-eyebrow {
+      font-size: 0.85rem;
+      color: var(--apple-blue);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .slide-main-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    /* NAVIGATION BUTTONS */
+    .nav-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .nav-btn {
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: var(--font-apple);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, background 0.2s;
+    }
+    .nav-btn:active {
+      transform: scale(0.98);
+    }
+    .btn-prev {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-white);
+    }
+    .btn-prev:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .btn-next {
+      background: var(--apple-blue);
+      color: #000;
+    }
+    .btn-next:hover {
+      background: #47a7ff;
+    }
+
+    /* NEXT SLIDE PREVIEW */
+    .next-preview-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .next-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--apple-gold);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .next-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* NOTES & REDEFADEN (Bullet format) */
+    .notes-scroll {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 18px 20px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #f1f1f5;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .notes-scroll .note-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .notes-scroll .note-bullet-dot {
+      color: var(--apple-gold);
+      font-weight: bold;
+      font-size: 1.2rem;
+      line-height: 1.3;
+    }
+    .notes-scroll b, .notes-scroll strong {
+      color: var(--apple-blue);
+      font-weight: 700;
+    }
+
+    /* BEAT MATRIX QUICK JUMPER */
+    .beat-matrix {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+      margin-top: 4px;
+    }
+    .matrix-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 7px;
+      color: var(--text-secondary);
+      padding: 6px 2px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .matrix-pill:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+    .matrix-pill.active {
+      background: var(--apple-blue) !important;
+      color: #000 !important;
+      font-weight: 800 !important;
+      border-color: var(--apple-blue) !important;
+      box-shadow: 0 0 10px rgba(41, 151, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-left">
+      <div class="status-badge" id="syncStatus">
+        <span class="status-dot"></span>
+        <span>Verbunden mit Beamer</span>
+      </div>
+      <div class="clock-display" id="clockDisplay">12:00:00</div>
+    </div>
+
+    <!-- LIVE PRÄSENTATIONS-TIMER -->
+    <div class="timer-container">
+      <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">ZEIT</span>
+      <div class="timer-digits" id="timerDigits">00:00</div>
+      <button class="timer-btn" id="timerToggleBtn">Start</button>
+      <button class="timer-btn" id="timerResetBtn">Reset</button>
+    </div>
+
+    <div style="font-weight: 700; font-size: 1.15rem; color: var(--text-secondary);" id="topBeatIndicator">
+      Beat 1 / 27
+    </div>
+  </header>
+
+  <!-- MAIN PRESENTER DASHBOARD -->
+  <main class="presenter-grid">
+    
+    <!-- LEFT: AKTUELLE FOLIE & STEUERUNG -->
+    <section style="display: flex; flex-direction: column; gap: 12px; height: 100%; overflow: hidden;">
+      
+      <div class="p-card current-beat-hero" style="flex: 0 0 auto;">
+        <div class="p-card-header">
+          <span class="p-card-title">Aktuell auf dem Beamer</span>
+          <span id="currentStationBadge" style="font-size: 0.85rem; font-weight: 600; color: var(--apple-blue);">Station 1 • Prolog</span>
+        </div>
+        <div class="slide-eyebrow" id="currentEyebrow">Prolog: Der Unternehmer</div>
+        <div class="slide-main-title" id="currentTitle">Prolog: Der Unternehmer</div>
+
+        <!-- NAVIGATION -->
+        <div class="nav-actions">
+          <button class="nav-btn btn-prev" id="prevBtn">← Zurück (←)</button>
+          <button class="nav-btn btn-next" id="nextBtn">Weiter (→ / Leertaste)</button>
+        </div>
+      </div>
+
+      <!-- NEXT PREVIEW -->
+      <div class="p-card" style="flex: 0 0 auto;">
+        <div class="p-card-header">
+          <span class="p-card-title" style="color: var(--text-secondary);">Als Nächstes kommt</span>
+          <span id="nextBeatNumber" style="font-size: 0.82rem; color: var(--text-secondary);">Beat 2</span>
+        </div>
+        <div class="next-preview-box">
+          <div class="next-label" id="nextStationLabel">Station 1 • Prolog</div>
+          <div class="next-title" id="nextTitle">Vision &amp; Realität</div>
+        </div>
+      </div>
+
+      <!-- BEAT MATRIX SCHNELLSPRINGER -->
+      <div class="p-card" style="flex: 1 1 auto; min-height: 0; justify-content: flex-start;">
+        <div class="p-card-header">
+          <span class="p-card-title">Direkt zu Beat springen</span>
+        </div>
+        <div class="beat-matrix" id="beatMatrix">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT: REDEFADEN & SPRECHNOTIZEN -->
+    <section style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+      <div class="p-card" style="height: 100%; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="p-card-header" style="flex: 0 0 auto;">
+          <span class="p-card-title" style="color: var(--apple-gold);">Sprechgedanke &amp; Moderation</span>
+          <span style="font-size: 0.85rem; color: var(--text-secondary);">Knackige Stichpunkte</span>
+        </div>
+        <div class="notes-scroll" id="notesText">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Native BroadcastChannel Sync
+    let syncChannel = null;
+    let currentBeat = 0;
+    const totalBeats = 27;
+
+    try {
+      syncChannel = new BroadcastChannel('p-seminar-sync');
+      syncChannel.onmessage = (event) => {
+        const data = event.data;
+        if (!data) return;
+        if (data.type === 'STATE_UPDATE') {
+          updatePresenterUI(data);
+        }
+      };
+    } catch (e) {
+      console.warn("BroadcastChannel not supported", e);
+    }
+
+    function sendCommand(type, payload = {}) {
+      if (!syncChannel) return;
+      syncChannel.postMessage({ type, ...payload });
+    }
+
+    function updatePresenterUI(data) {
+      currentBeat = data.currentBeat;
+      document.getElementById('topBeatIndicator').textContent = `Beat ${currentBeat + 1} / ${data.totalBeats}`;
+      
+      const b = data.beat;
+      document.getElementById('currentTitle').textContent = b.title;
+      document.getElementById('currentEyebrow').textContent = b.stationName || b.stationId;
+      document.getElementById('currentStationBadge').textContent = b.stationName || b.stationId;
+      document.getElementById('notesText').innerHTML = b.spoken;
+
+      // Next preview
+      if (data.nextBeat) {
+        document.getElementById('nextTitle').textContent = data.nextBeat.title;
+        document.getElementById('nextStationLabel').textContent = data.nextBeat.stationName || data.nextBeat.stationId;
+        document.getElementById('nextBeatNumber').textContent = `Beat ${currentBeat + 2}`;
+      } else {
+        document.getElementById('nextTitle').textContent = '— Ende der Präsentation —';
+        document.getElementById('nextStationLabel').textContent = 'Vielen Dank';
+        document.getElementById('nextBeatNumber').textContent = 'Ende';
+      }
+
+      // Update Matrix Active State
+      document.querySelectorAll('.matrix-pill').forEach((pill, idx) => {
+        if (idx === currentBeat) {
+          pill.classList.add('active');
+        } else {
+          pill.classList.remove('active');
+        }
+      });
+    }
+
+    // Populate Beat Matrix
+    const matrixContainer = document.getElementById('beatMatrix');
+    for (let i = 0; i < totalBeats; i++) {
+      const btn = document.createElement('button');
+      btn.className = `matrix-pill ${i === 0 ? 'active' : ''}`;
+      btn.textContent = `B ${i + 1}`;
+      btn.id = `pill-beat-${i}`;
+      btn.title = `Zu Beat ${i + 1} springen`;
+      btn.addEventListener('click', () => {
+        sendCommand('GO_TO_BEAT', { index: i });
+        document.querySelectorAll('.matrix-pill').forEach((p, idx) => {
+          if (idx === i) p.classList.add('active');
+          else p.classList.remove('active');
+        });
+      });
+      matrixContainer.appendChild(btn);
+    }
+
+    // Controls
+    document.getElementById('nextBtn').addEventListener('click', () => sendCommand('NEXT'));
+    document.getElementById('prevBtn').addEventListener('click', () => sendCommand('PREV'));
+
+    // Keyboard navigation in Presenter View (ArrowRight, Space, ArrowLeft)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        sendCommand('NEXT');
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        e.preventDefault();
+        sendCommand('PREV');
+      }
+    });
+
+    // Real-Time Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clockDisplay').textContent = now.toLocaleTimeString('de-DE');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Presentation Stopwatch Timer
+    let timerRunning = false;
+    let timerSeconds = 0;
+    let timerInterval = null;
+    const timerDigits = document.getElementById('timerDigits');
+    const timerToggleBtn = document.getElementById('timerToggleBtn');
+    const timerResetBtn = document.getElementById('timerResetBtn');
+
+    function renderTimer() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      timerDigits.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      if (mins >= 15) {
+        timerDigits.style.color = 'var(--apple-red)';
+      } else if (mins >= 10) {
+        timerDigits.style.color = 'var(--apple-gold)';
+      } else {
+        timerDigits.style.color = 'var(--apple-blue)';
+      }
+    }
+
+    timerToggleBtn.addEventListener('click', () => {
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerToggleBtn.textContent = 'Weiter';
+      } else {
+        timerRunning = true;
+        timerToggleBtn.textContent = 'Pause';
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          renderTimer();
+        }, 1000);
+      }
+    });
+
+    timerResetBtn.addEventListener('click', () => {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 0;
+      timerToggleBtn.textContent = 'Start';
+      renderTimer();
+    });
+
+    // Request initial state from main slide window immediately and with retries
+    setTimeout(() => sendCommand('REQUEST_STATE'), 100);
+    setTimeout(() => sendCommand('REQUEST_STATE'), 500);
+    setTimeout(() => sendCommand('REQUEST_STATE'), 1200);
+  </script>
+</body>
+</html>
