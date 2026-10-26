@@ -379,10 +379,317 @@
   </main>
 
   <script>
-    // Native BroadcastChannel Sync
+    const beats = [
+      // ========================================================
+      // 1. STATION 1: PROLOG & GRUNDDEFINITION
+      // ========================================================
+      {
+        camera: { x: 0, y: 0, z: -50, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.35)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Prolog",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Prolog: Der Unternehmer",
+        spoken: "• <b>Begrüßung:</b> Herzlich willkommen zu meiner Präsentation<br>• <b>Thema:</b> Das Berufsbild des Unternehmers<br>• <b>Leitgedanke:</b> Zwischen strategischer Vision, vollem Risiko und echter Verantwortung"
+      },
+      {
+        camera: { x: 290, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Grunddefinition",
+        headerMode: 'dimmed',
+        activeCard: 'card-s1-definition',
+        title: "Was ist ein Unternehmer?",
+        spoken: "• <b>Eigene Firma:</b> Gründet oder übernimmt einen eigenständigen Betrieb<br>• <b>Selbstverwaltung:</b> Trifft alle Entscheidungen autonom – kein Chef über ihm<br>• <b>Volles Risiko:</b> Gewinn oder Verlust liegen zu 100% in eigener Hand<br>• <b>Ziel:</b> Dauerhaft Werte &amp; Arbeitsplätze schaffen statt reiner Stundenlohn"
+      },
+      {
+        camera: { x: -290, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-1',
+        stationName: "Station 1 • Der Vergleich",
+        headerMode: 'dimmed',
+        activeCard: 'card-s1-comparison',
+        title: "Unternehmer vs. Angestellter",
+        spoken: "• <b>Angestellter:</b> Festes Gehalt, geregelte Arbeitszeiten, klare Vorgaben vom Chef<br>• <b>Unternehmer:</b> Kein garantiertes Monatseinkommen, keine Stechuhr, volle Haftung<br>• <b>Freiheit &amp; Druck:</b> Maximale Selbstbestimmung bei gleichzeitig maximaler Eigenverantwortung"
+      },
+
+      // ========================================================
+      // 2. STATION 2: DAS BERUFSBILD (DIE 3 ROLLEN IM ALLTAG)
+      // ========================================================
+      {
+        camera: { x: -2600, y: 0, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.32)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Das Berufsbild im Alltag",
+        spoken: "• <b>Die Kernfrage:</b> Was macht ein Unternehmer eigentlich den ganzen Tag?<br>• <b>Kein Monoton-Job:</b> Kein klassischer Schreibtischalltag mit festen Abläufen<br>• <b>Dreiklang:</b> Vereint täglich 3 völlig unterschiedliche Rollen gleichzeitig"
+      },
+      {
+        camera: { x: -2220, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-strategist',
+        title: "Rolle 1: Der Stratege",
+        spoken: "• <b>Zukunftsplan:</b> Wo soll die Firma in 3 bis 5 Jahren stehen?<br>• <b>Markt &amp; Angebote:</b> Neue Produkte, Dienstleistungen oder Standorte entwickeln<br>• <b>Wettbewerb:</b> Konkurrenz beobachten und eigene Stärken ausbauen<br>• <b>Investitionen:</b> Gezielter Einsatz von Kapital für Maschinen, Software oder Räume"
+      },
+      {
+        camera: { x: -2600, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-crisis',
+        title: "Rolle 2: Der Krisenmanager (60h+)",
+        spoken: "• <b>Akute Notfälle:</b> Lieferausfälle, Kostenexplosionen oder abspringende Großkunden<br>• <b>Kein Feierabend:</b> Probleme landen immer auf dem Tisch des Chefs<br>• <b>Sofortige Lösungen:</b> Schnelle Entscheidungen unter hohem Druck treffen<br>• <b>Arbeitslast:</b> Häufig 60+ Wochenstunden – ständige Erreichbarkeit"
+      },
+      {
+        camera: { x: -2980, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(48, 209, 88, 0.45)',
+        stationId: 'station-2',
+        stationName: "Station 2 • Die 3 Rollen",
+        headerMode: 'dimmed',
+        activeCard: 'card-role-leader',
+        title: "Rolle 3: Die Führungskraft (100%)",
+        spoken: "• <b>Teamaufbau:</b> Die passenden Mitarbeiter einstellen, motivieren und halten<br>• <b>Vorbildfunktion:</b> Fairness, Verlässlichkeit und Vertrauen vorleben<br>• <b>Löhne:</b> Pünktliche und faire Bezahlung der Belegschaft sicherstellen<br>• <b>100% Pflicht:</b> Soziale Verantwortung für Mitarbeiter und Familien"
+      },
+
+      // ========================================================
+      // 3. STATION 3: HARD SKILLS VS. SOFT SKILLS
+      // ========================================================
+      {
+        camera: { x: -5200, y: 0, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.32)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Qualifikationen: Hard & Soft Skills",
+        spoken: "• <b>Einstiegsfrage:</b> Wie wird man überhaupt Unternehmer?<br>• <b>Kopf vs. Charakter:</b> Fachliches Handwerkszeug (Hard) trifft Persönlichkeit (Soft)<br>• <b>Die Formel:</b> Hard Skills braucht man zum Steuern – Soft Skills zum Durchhalten"
+      },
+      {
+        camera: { x: -4910, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'dimmed',
+        activeCard: 'card-hard-skills',
+        title: "Hard Skills & Bildungswege",
+        spoken: "• <b>Zahlen im Blick:</b> Einnahmen, Ausgaben und Gewinn genau berechnen können<br>• <b>Finanzieller Puffer:</b> Immer wissen, ob genug Geld für Miete und Gehälter da ist<br>• <b>Verträge &amp; Gesetze:</b> Arbeitsverträge, Mietverträge und Vorschriften verstehen<br>• <b>Bildungswege:</b> Kein fester Pfad – Lehre, Studium (z. B. BWL) oder Quereinstieg"
+      },
+      {
+        camera: { x: -5490, y: 0, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.45)',
+        stationId: 'station-3',
+        stationName: "Station 3 • Qualifikationen",
+        headerMode: 'dimmed',
+        activeCard: 'card-soft-skills',
+        title: "Soft Skills & Persönlichkeit",
+        spoken: "• <b>Stressresistenz:</b> Schlafen können und ruhig bleiben, auch wenn es brennt<br>• <b>Menschenkenntnis:</b> Überzeugend mit Banken, Kunden und Partnern verhandeln<br>• <b>Mut zum Risiko:</b> Entscheidungen treffen, auch wenn die Zukunft unsicher ist<br>• <b>Disziplin &amp; Fleiß:</b> Durchhalten, wenn die erste Motivation nachlässt"
+      },
+
+      // ========================================================
+      // 4. STATION 4: CHANCEN VS. RISIKEN
+      // ========================================================
+      {
+        camera: { x: -5200, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(255, 255, 255, 0.22)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Chancen vs. Risiken",
+        spoken: "• <b>Ehrlicher Blick:</b> Nüchterne Abwägung der Licht- und Schattenseiten<br>• <b>Realitätscheck:</b> Unternehmertum bietet enorme Freiheiten, aber keinen Schutzraum"
+      },
+      {
+        camera: { x: -4910, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(48, 209, 88, 0.48)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'dimmed',
+        activeCard: 'card-chances',
+        title: "Große Chancen",
+        spoken: "• <b>Freiheit:</b> Eigene Ideen direkt verwirklichen ohne Vorgesetzte<br>• <b>Finanzieller Hebel:</b> Einkommen wächst mit dem Erfolg der Firma – keine Grenze nach oben<br>• <b>Bleibende Werte:</b> Ein echtes Unternehmen und dauerhafte Sachwerte aufbauen<br>• <b>Gesellschaftlicher Beitrag:</b> Echte Ausbildungs- und Arbeitsplätze vor Ort schaffen"
+      },
+      {
+        camera: { x: -5490, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(255, 69, 58, 0.48)',
+        stationId: 'station-4',
+        stationName: "Station 4 • Chancen & Risiken",
+        headerMode: 'dimmed',
+        activeCard: 'card-risks',
+        title: "Echte Risiken",
+        spoken: "• <b>Persönliche Haftung:</b> Im Ernstfall haftet man oft mit dem eigenen Privatvermögen<br>• <b>Kein Sicherheitsnetz:</b> Kein bezahlter Urlaub, kein bezahltes Krankengeld, kein Kündigungsschutz<br>• <b>Hoher Druck:</b> Ständige Ungewissheit über Aufträge und Marktlage<br>• <b>Verlustrisiko:</b> Wenn die Firma scheitert, drohen Schulden statt Gehalt"
+      },
+
+      // ========================================================
+      // 5. STATION 5: PRAXIS-PORTRÄT: HELMUT PISTON
+      // ========================================================
+      {
+        camera: { x: -2600, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.38)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Praxis-Porträt: Helmut Piston",
+        spoken: "• <b>Theorie trifft Praxis:</b> Konkreter Blick auf einen echten regionalen Unternehmer<br>• <b>Persönlichkeit:</b> Helmut Piston aus der Region Nordbaden / Karlsruhe / Böblingen<br>• <b>Erfolgsweg:</b> Vom klassischen Kaufmann zum erfolgreichen Multi-Store-Inhaber"
+      },
+      {
+        camera: { x: -2310, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.52)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-profile',
+        title: "Werdegang & Unternehmensgruppe",
+        spoken: "• <b>Wurzeln:</b> Kaufmann aus Leidenschaft in der Region Karlsruhe und Böblingen<br>• <b>Wachstum:</b> Vom einzelnen Geschäft zur Piston-Gruppe mit über 500 Mitarbeitern<br>• <b>Großfläche:</b> Betreibt u. a. das große E-Center Piston in Böblingen-Hulb<br>• <b>Innovation:</b> Vorreiter bei modernen Shop-in-Shop-Formaten und Frischekonzepten"
+      },
+      {
+        camera: { x: -2890, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-5',
+        stationName: "Station 5 • Porträt Piston",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-motto',
+        title: "Philosophie: „Menschen muss man mögen“",
+        spoken: "• <b>Sein Leitsatz:</b> „Menschen muss man mögen“ als zentraler Unternehmenskompass<br>• <b>Erfolgsgeheimnis:</b> Unternehmertum ist kein kaltes Rechnen, sondern Beziehungsarbeit<br>• <b>Teamkultur:</b> Große Wertschätzung, eigene Ausbildung und sichere Arbeitsplätze<br>• <b>Regionale Nähe:</b> Aktive Unterstützung für lokale Vereine und regionale Lieferanten"
+      },
+
+      // ========================================================
+      // 6. STATION 6: DAS GESCHÄFTSMODELL (DIE 3 SÄULEN)
+      // ========================================================
+      {
+        camera: { x: 0, y: -2200, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.35)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Das Geschäftsmodell: Die 3 Säulen",
+        spoken: "• <b>Diversifikation:</b> Wie sichert Helmut Piston seine Unternehmensgruppe ab?<br>• <b>Risikostreuung:</b> Er setzt auf 3 grundlegend verschiedene Systeme im Handel"
+      },
+      {
+        camera: { x: 380, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(0, 140, 255, 0.52)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-edeka',
+        title: "Säule 1: Edeka Piston",
+        spoken: "• <b>Modell:</b> Selbstständiger Kaufmann (e.K.) im Edeka-Genossenschaftsverbund<br>• <b>Vorteil:</b> Riesige gemeinsame Einkaufskraft und Logistik im Hintergrund<br>• <b>Autonomie:</b> Volle Freiheit bei Sortimentsgestaltung, Preisen und Personal vor Ort"
+      },
+      {
+        camera: { x: 0, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-zooco',
+        title: "Säule 2: Zoo & Co.",
+        spoken: "• <b>Fachmarkt:</b> Spezialist für Tierbedarf im Franchise-Netzwerk der SAGAFLOR AG<br>• <b>Verbandsarbeit:</b> Helmut Piston sitzt aktiv im Aufsichtsrat der SAGAFLOR AG<br>• <b>Synergie:</b> Risikostreuung außerhalb des klassischen Lebensmittelmarktes"
+      },
+      {
+        camera: { x: -380, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(16, 185, 129, 0.48)',
+        stationId: 'station-6',
+        stationName: "Station 6 • Die 3 Säulen",
+        headerMode: 'dimmed',
+        activeCard: 'card-piston-goepi',
+        title: "Säule 3: Kette GöPi",
+        spoken: "• <b>Eigenmarke:</b> Eigene Kette für Bio-Supermärkte (Karlsruhe, Ettlingen, Straubenhardt)<br>• <b>Unabhängigkeit:</b> 100% eigene Marke und vollständige Entscheidungsfreiheit<br>• <b>Zukunftstrend:</b> Frühe Positionierung im Wachstumsmarkt für ökologische Ernährung"
+      },
+
+      // ========================================================
+      // 7. STATION 7: EXPERTENINTERVIEW MIT HELMUT PISTON
+      // ========================================================
+      {
+        camera: { x: 0, y: -4400, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.35)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Experteninterview: Helmut Piston",
+        spoken: "• <b>Empirischer Kern:</b> Tiefeninterview mit Helmut Piston als Herzstück des P-Seminars<br>• <b>Ziel:</b> Echte Einblicke hinter die Kulissen statt trockener Schulbuchtheorie"
+      },
+      {
+        camera: { x: 290, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.48)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'dimmed',
+        activeCard: 'card-interview-status',
+        title: "Termin: Pfingstferien",
+        spoken: "• <b>Zeitplan:</b> Fester Vor-Ort-Termin für die kommenden Pfingstferien vereinbart<br>• <b>Format:</b> Strukturiertes persönliches Leitfaden-Interview vor Ort<br>• <b>Ergebnis:</b> Detaillierte Fallstudie für meine P-Seminar-Arbeit und das Kolloquium"
+      },
+      {
+        camera: { x: -290, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-7',
+        stationName: "Station 7 • Experteninterview",
+        headerMode: 'dimmed',
+        activeCard: 'card-interview-questions',
+        title: "Die 4 Kernfragen des Leitfadens",
+        spoken: "• <b>1. Gründungsimpuls:</b> Was gab den Anstoß für den Schritt in die Selbstständigkeit?<br>• <b>2. Systemvergleich:</b> Wie unterscheiden sich Genossenschaft, Franchise und Eigenmarke in der Praxis?<br>• <b>3. Krisenresilienz:</b> Wie meistert man Lieferkrisen und Energiekostenexplosionen?<br>• <b>4. Ratschlag:</b> Welche Fähigkeiten empfiehlt er jungen Menschen heute fürs Unternehmertum?"
+      },
+
+      // ========================================================
+      // 8. STATION 8: FAZIT & KERNBOTSCHAFT
+      // ========================================================
+      {
+        camera: { x: -2600, y: -4400, z: -60, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.35)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Fazit & Eigene Perspektive",
+        spoken: "• <b>Mein Resümee:</b> Was nehme ich aus der Vorbereitung und Recherche mit?<br>• <b>Erkenntnis:</b> Unternehmertum ist kein Glücksspiel, sondern anspruchsvolles Handwerk"
+      },
+      {
+        camera: { x: -2310, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.48)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'dimmed',
+        activeCard: 'card-conclusion-reflection',
+        title: "Warum Unternehmertum?",
+        spoken: "• <b>Selbstbestimmung:</b> Nicht nur Rädchen im Getriebe sein – das Getriebe selbst bauen<br>• <b>Verantwortung:</b> Stolz darauf sein, echte Arbeitsplätze zu sichern und Werte zu schaffen<br>• <b>Perspektive:</b> Ein extrem fordernder, aber erfüllender und selbstbestimmter Lebensweg"
+      },
+      {
+        camera: { x: -2890, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
+        glow: 'rgba(245, 166, 35, 0.55)',
+        stationId: 'station-8',
+        stationName: "Station 8 • Fazit",
+        headerMode: 'dimmed',
+        activeCard: 'card-conclusion-quote',
+        title: "Die Kernbotschaft",
+        spoken: "• <b>Leitspruch:</b> „Erfolg entsteht nicht durch die beste Idee...“<br>• <b>Sondern:</b> „...sondern durch die ausdauerndste Umsetzung.“<br>• <b>Haltung:</b> Jeden Tag aufstehen, Probleme lösen und für das Team da sein"
+      },
+
+      // ========================================================
+      // 9. STATION 9: ENDFOLIE (HABT IHR NOCH FRAGEN?)
+      // ========================================================
+      {
+        camera: { x: -5200, y: -4400, z: 0, rotX: 0, rotY: 0 },
+        glow: 'rgba(41, 151, 255, 0.45)',
+        stationId: 'station-9',
+        stationName: "Station 9 • Fragen",
+        headerMode: 'focus',
+        activeCard: null,
+        title: "Habt ihr noch Fragen?",
+        spoken: "• <b>Abschluss:</b> Vielen Dank für eure Aufmerksamkeit!<br>• <b>Diskussion:</b> Ich freue mich jetzt auf eure Fragen zum Berufsbild oder zu Helmut Piston!"
+      }
+    ];
+
     let syncChannel = null;
     let currentBeat = 0;
-    const totalBeats = 27;
+    const totalBeats = beats.length;
 
     try {
       syncChannel = new BroadcastChannel('p-seminar-sync');
@@ -391,10 +698,16 @@
         if (!data) return;
         if (data.type === 'STATE_UPDATE') {
           updatePresenterUI(data);
+        } else if (data.type === 'GO_TO_BEAT') {
+          renderBeat(data.index, false);
+        } else if (data.type === 'NEXT') {
+          renderBeat(currentBeat + 1, false);
+        } else if (data.type === 'PREV') {
+          renderBeat(currentBeat - 1, false);
         }
       };
     } catch (e) {
-      console.warn("BroadcastChannel not supported", e);
+      console.warn('BroadcastChannel not supported', e);
     }
 
     function sendCommand(type, payload = {}) {
@@ -433,6 +746,20 @@
       });
     }
 
+    function renderBeat(idx, emit = true) {
+      if (idx < 0 || idx >= beats.length) return;
+      currentBeat = idx;
+      updatePresenterUI({
+        currentBeat: idx,
+        totalBeats: beats.length,
+        beat: beats[idx],
+        nextBeat: beats[idx + 1] || null
+      });
+      if (emit) {
+        sendCommand('GO_TO_BEAT', { index: idx });
+      }
+    }
+
     // Populate Beat Matrix
     const matrixContainer = document.getElementById('beatMatrix');
     for (let i = 0; i < totalBeats; i++) {
@@ -440,29 +767,29 @@
       btn.className = `matrix-pill ${i === 0 ? 'active' : ''}`;
       btn.textContent = `B ${i + 1}`;
       btn.id = `pill-beat-${i}`;
-      btn.title = `Zu Beat ${i + 1} springen`;
+      btn.title = `Zu Beat ${i + 1}: ${beats[i].title}`;
       btn.addEventListener('click', () => {
-        sendCommand('GO_TO_BEAT', { index: i });
-        document.querySelectorAll('.matrix-pill').forEach((p, idx) => {
-          if (idx === i) p.classList.add('active');
-          else p.classList.remove('active');
-        });
+        renderBeat(i, true);
       });
       matrixContainer.appendChild(btn);
     }
 
     // Controls
-    document.getElementById('nextBtn').addEventListener('click', () => sendCommand('NEXT'));
-    document.getElementById('prevBtn').addEventListener('click', () => sendCommand('PREV'));
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      renderBeat(currentBeat + 1, true);
+    });
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      renderBeat(currentBeat - 1, true);
+    });
 
     // Keyboard navigation in Presenter View (ArrowRight, Space, ArrowLeft)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        sendCommand('NEXT');
+        renderBeat(currentBeat + 1, true);
       } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
         e.preventDefault();
-        sendCommand('PREV');
+        renderBeat(currentBeat - 1, true);
       }
     });
 
@@ -499,10 +826,12 @@
       if (timerRunning) {
         clearInterval(timerInterval);
         timerRunning = false;
-        timerToggleBtn.textContent = 'Weiter';
+        timerToggleBtn.textContent = 'Start';
+        timerToggleBtn.style.background = 'rgba(255, 255, 255, 0.1)';
       } else {
         timerRunning = true;
         timerToggleBtn.textContent = 'Pause';
+        timerToggleBtn.style.background = 'var(--apple-blue)';
         timerInterval = setInterval(() => {
           timerSeconds++;
           renderTimer();
@@ -514,14 +843,13 @@
       clearInterval(timerInterval);
       timerRunning = false;
       timerSeconds = 0;
-      timerToggleBtn.textContent = 'Start';
       renderTimer();
+      timerToggleBtn.textContent = 'Start';
+      timerToggleBtn.style.background = 'rgba(255, 255, 255, 0.1)';
     });
 
-    // Request initial state from main slide window immediately and with retries
-    setTimeout(() => sendCommand('REQUEST_STATE'), 100);
-    setTimeout(() => sendCommand('REQUEST_STATE'), 500);
-    setTimeout(() => sendCommand('REQUEST_STATE'), 1200);
+    // Initial render of Beat 0
+    renderBeat(0, false);
   </script>
 </body>
 </html>
