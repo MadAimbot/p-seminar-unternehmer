@@ -154,21 +154,21 @@
       cursor: pointer;
     }
 
-    /* ACTIVE SPOTLIGHT: Starker 3D-Zoom für maximale Lesbarkeit in den hinteren Reihen */
+    /* ACTIVE SPOTLIGHT: Sanfter Apple-Fokus, perfekt eingepasst für iPad- und Beamer-Bildschirme */
     .bento-card.active-spotlight {
       border-color: var(--card-border-active);
-      box-shadow: 0 45px 110px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.4);
       opacity: 1 !important;
       filter: blur(0px) !important;
-      transform: scale(1.08) translateZ(50px) !important;
+      transform: scale(1.02) translateZ(15px) !important;
       pointer-events: auto !important;
     }
 
-    /* DEEP BACKGROUND BLUR (8px): Inaktive Kacheln werden stark unscharf */
+    /* DEEP BACKGROUND BLUR (6px): Inaktive Kacheln treten dezent in den Hintergrund */
     .bento-card.dimmed {
-      opacity: 0.15 !important;
-      filter: blur(8px) !important;
-      transform: scale(0.95) translateZ(-20px);
+      opacity: 0.18 !important;
+      filter: blur(6px) !important;
+      transform: scale(0.97) translateZ(-10px);
       pointer-events: none;
     }
 
@@ -548,14 +548,14 @@
       font-weight: 400;
     }
 
-    /* Responsive Scaling & iPad Optimizations */
+    /* Responsive Scaling & iPad Optimizations (Sorgt dafür, dass auf iPad und Beamer alles vollständig sichtbar bleibt) */
     @media (max-width: 1200px) {
       .station {
         transform-origin: center center;
-        scale: 0.88;
+        scale: 0.85;
       }
       .hud-bar {
-        scale: 0.94;
+        scale: 0.92;
         bottom: 20px;
       }
       .touch-edge {
@@ -564,15 +564,23 @@
     }
     @media (max-width: 900px) {
       .station {
-        scale: 0.74;
+        transform-origin: center center;
+        scale: 0.72;
       }
       .hud-pill:not(.always-show) {
         display: none;
       }
     }
+    @media (max-height: 860px) {
+      .station {
+        transform-origin: center center;
+        scale: 0.82;
+      }
+    }
     @media (max-height: 750px) {
       .station {
-        scale: 0.78;
+        transform-origin: center center;
+        scale: 0.74;
       }
     }
   </style>
@@ -1198,7 +1206,7 @@
       });
     }
 
-    // 27 Master Beats: Mit starkem Zoom (z: 230 für Kacheln) und knackigen Stichpunkten für den Referenten
+    // 27 Master Beats: Mit starkem Zoom (z: 0 für Kacheln) und knackigen Stichpunkten für den Referenten
     const beats = [
       // ========================================================
       // 1. STATION 1: PROLOG & GRUNDDEFINITION
@@ -1214,7 +1222,7 @@
         spoken: "• <b>Begrüßung:</b> Herzlich willkommen zu meiner Präsentation<br>• <b>Thema:</b> Das Berufsbild des Unternehmers<br>• <b>Leitgedanke:</b> Zwischen strategischer Vision, vollem Risiko und echter Verantwortung"
       },
       {
-        camera: { x: 290, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: 290, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(41, 151, 255, 0.48)',
         stationId: 'station-1',
         stationName: "Station 1 • Grunddefinition",
@@ -1224,7 +1232,7 @@
         spoken: "• <b>Eigene Firma:</b> Gründet oder übernimmt einen eigenständigen Betrieb<br>• <b>Selbstverwaltung:</b> Trifft alle Entscheidungen autonom – kein Chef über ihm<br>• <b>Volles Risiko:</b> Gewinn oder Verlust liegen zu 100% in eigener Hand<br>• <b>Ziel:</b> Dauerhaft Werte &amp; Arbeitsplätze schaffen statt reiner Stundenlohn"
       },
       {
-        camera: { x: -290, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -290, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.45)',
         stationId: 'station-1',
         stationName: "Station 1 • Der Vergleich",
@@ -1248,7 +1256,7 @@
         spoken: "• <b>Die Kernfrage:</b> Was macht ein Unternehmer eigentlich den ganzen Tag?<br>• <b>Kein Monoton-Job:</b> Kein klassischer Schreibtischalltag mit festen Abläufen<br>• <b>Dreiklang:</b> Vereint täglich 3 völlig unterschiedliche Rollen gleichzeitig"
       },
       {
-        camera: { x: -2220, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2220, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(41, 151, 255, 0.48)',
         stationId: 'station-2',
         stationName: "Station 2 • Die 3 Rollen",
@@ -1258,7 +1266,7 @@
         spoken: "• <b>Zukunftsplan:</b> Wo soll die Firma in 3 bis 5 Jahren stehen?<br>• <b>Markt &amp; Angebote:</b> Neue Produkte, Dienstleistungen oder Standorte entwickeln<br>• <b>Wettbewerb:</b> Konkurrenz beobachten und eigene Stärken ausbauen<br>• <b>Investitionen:</b> Gezielter Einsatz von Kapital für Maschinen, Software oder Räume"
       },
       {
-        camera: { x: -2600, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2600, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.45)',
         stationId: 'station-2',
         stationName: "Station 2 • Die 3 Rollen",
@@ -1268,7 +1276,7 @@
         spoken: "• <b>Akute Notfälle:</b> Lieferausfälle, Kostenexplosionen oder abspringende Großkunden<br>• <b>Kein Feierabend:</b> Probleme landen immer auf dem Tisch des Chefs<br>• <b>Sofortige Lösungen:</b> Schnelle Entscheidungen unter hohem Druck treffen<br>• <b>Arbeitslast:</b> Häufig 60+ Wochenstunden – ständige Erreichbarkeit"
       },
       {
-        camera: { x: -2980, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2980, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(48, 209, 88, 0.45)',
         stationId: 'station-2',
         stationName: "Station 2 • Die 3 Rollen",
@@ -1292,7 +1300,7 @@
         spoken: "• <b>Einstiegsfrage:</b> Wie wird man überhaupt Unternehmer?<br>• <b>Kopf vs. Charakter:</b> Fachliches Handwerkszeug (Hard) trifft Persönlichkeit (Soft)<br>• <b>Die Formel:</b> Hard Skills braucht man zum Steuern – Soft Skills zum Durchhalten"
       },
       {
-        camera: { x: -4910, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -4910, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(41, 151, 255, 0.48)',
         stationId: 'station-3',
         stationName: "Station 3 • Qualifikationen",
@@ -1302,7 +1310,7 @@
         spoken: "• <b>Zahlen im Blick:</b> Einnahmen, Ausgaben und Gewinn genau berechnen können<br>• <b>Finanzieller Puffer:</b> Immer wissen, ob genug Geld für Miete und Gehälter da ist<br>• <b>Verträge &amp; Gesetze:</b> Arbeitsverträge, Mietverträge und Vorschriften verstehen<br>• <b>Bildungswege:</b> Kein fester Pfad – Lehre, Studium (z. B. BWL) oder Quereinstieg"
       },
       {
-        camera: { x: -5490, y: 0, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -5490, y: 0, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.45)',
         stationId: 'station-3',
         stationName: "Station 3 • Qualifikationen",
@@ -1326,7 +1334,7 @@
         spoken: "• <b>Ehrlicher Blick:</b> Nüchterne Abwägung der Licht- und Schattenseiten<br>• <b>Realitätscheck:</b> Unternehmertum bietet enorme Freiheiten, aber keinen Schutzraum"
       },
       {
-        camera: { x: -4910, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -4910, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(48, 209, 88, 0.48)',
         stationId: 'station-4',
         stationName: "Station 4 • Chancen & Risiken",
@@ -1336,7 +1344,7 @@
         spoken: "• <b>Freiheit:</b> Eigene Ideen direkt verwirklichen ohne Vorgesetzte<br>• <b>Finanzieller Hebel:</b> Einkommen wächst mit dem Erfolg der Firma – keine Grenze nach oben<br>• <b>Bleibende Werte:</b> Ein echtes Unternehmen und dauerhafte Sachwerte aufbauen<br>• <b>Gesellschaftlicher Beitrag:</b> Echte Ausbildungs- und Arbeitsplätze vor Ort schaffen"
       },
       {
-        camera: { x: -5490, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -5490, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(255, 69, 58, 0.48)',
         stationId: 'station-4',
         stationName: "Station 4 • Chancen & Risiken",
@@ -1360,7 +1368,7 @@
         spoken: "• <b>Theorie trifft Praxis:</b> Konkreter Blick auf einen echten regionalen Unternehmer<br>• <b>Persönlichkeit:</b> Helmut Piston aus der Region Nordbaden / Karlsruhe / Böblingen<br>• <b>Erfolgsweg:</b> Vom klassischen Kaufmann zum erfolgreichen Multi-Store-Inhaber"
       },
       {
-        camera: { x: -2310, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2310, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(0, 140, 255, 0.52)',
         stationId: 'station-5',
         stationName: "Station 5 • Porträt Piston",
@@ -1370,7 +1378,7 @@
         spoken: "• <b>Wurzeln:</b> Kaufmann aus Leidenschaft in der Region Karlsruhe und Böblingen<br>• <b>Wachstum:</b> Vom einzelnen Geschäft zur Piston-Gruppe mit über 500 Mitarbeitern<br>• <b>Großfläche:</b> Betreibt u. a. das große E-Center Piston in Böblingen-Hulb<br>• <b>Innovation:</b> Vorreiter bei modernen Shop-in-Shop-Formaten und Frischekonzepten"
       },
       {
-        camera: { x: -2890, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2890, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.48)',
         stationId: 'station-5',
         stationName: "Station 5 • Porträt Piston",
@@ -1394,7 +1402,7 @@
         spoken: "• <b>Diversifikation:</b> Wie sichert Helmut Piston seine Unternehmensgruppe ab?<br>• <b>Risikostreuung:</b> Er setzt auf 3 grundlegend verschiedene Systeme im Handel"
       },
       {
-        camera: { x: 380, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: 380, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(0, 140, 255, 0.52)',
         stationId: 'station-6',
         stationName: "Station 6 • Die 3 Säulen",
@@ -1404,7 +1412,7 @@
         spoken: "• <b>Modell:</b> Selbstständiger Kaufmann (e.K.) im Edeka-Genossenschaftsverbund<br>• <b>Vorteil:</b> Riesige gemeinsame Einkaufskraft und Logistik im Hintergrund<br>• <b>Autonomie:</b> Volle Freiheit bei Sortimentsgestaltung, Preisen und Personal vor Ort"
       },
       {
-        camera: { x: 0, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: 0, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.48)',
         stationId: 'station-6',
         stationName: "Station 6 • Die 3 Säulen",
@@ -1414,7 +1422,7 @@
         spoken: "• <b>Fachmarkt:</b> Spezialist für Tierbedarf im Franchise-Netzwerk der SAGAFLOR AG<br>• <b>Verbandsarbeit:</b> Helmut Piston sitzt aktiv im Aufsichtsrat der SAGAFLOR AG<br>• <b>Synergie:</b> Risikostreuung außerhalb des klassischen Lebensmittelmarktes"
       },
       {
-        camera: { x: -380, y: -2200, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -380, y: -2200, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(16, 185, 129, 0.48)',
         stationId: 'station-6',
         stationName: "Station 6 • Die 3 Säulen",
@@ -1438,7 +1446,7 @@
         spoken: "• <b>Empirischer Kern:</b> Tiefeninterview mit Helmut Piston als Herzstück des P-Seminars<br>• <b>Ziel:</b> Echte Einblicke hinter die Kulissen statt trockener Schulbuchtheorie"
       },
       {
-        camera: { x: 290, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: 290, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.48)',
         stationId: 'station-7',
         stationName: "Station 7 • Experteninterview",
@@ -1448,7 +1456,7 @@
         spoken: "• <b>Zeitplan:</b> Fester Vor-Ort-Termin für die kommenden Pfingstferien vereinbart<br>• <b>Format:</b> Strukturiertes persönliches Leitfaden-Interview vor Ort<br>• <b>Ergebnis:</b> Detaillierte Fallstudie für meine P-Seminar-Arbeit und das Kolloquium"
       },
       {
-        camera: { x: -290, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -290, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(41, 151, 255, 0.48)',
         stationId: 'station-7',
         stationName: "Station 7 • Experteninterview",
@@ -1472,7 +1480,7 @@
         spoken: "• <b>Mein Resümee:</b> Was nehme ich aus der Vorbereitung und Recherche mit?<br>• <b>Erkenntnis:</b> Unternehmertum ist kein Glücksspiel, sondern anspruchsvolles Handwerk"
       },
       {
-        camera: { x: -2310, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2310, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(41, 151, 255, 0.48)',
         stationId: 'station-8',
         stationName: "Station 8 • Fazit",
@@ -1482,7 +1490,7 @@
         spoken: "• <b>Selbstbestimmung:</b> Nicht nur Rädchen im Getriebe sein – das Getriebe selbst bauen<br>• <b>Verantwortung:</b> Stolz darauf sein, echte Arbeitsplätze zu sichern und Werte zu schaffen<br>• <b>Perspektive:</b> Ein extrem fordernder, aber erfüllender und selbstbestimmter Lebensweg"
       },
       {
-        camera: { x: -2890, y: -4400, z: 230, rotX: 1.0, rotY: 0 },
+        camera: { x: -2890, y: -4400, z: 0, rotX: 1.0, rotY: 0 },
         glow: 'rgba(245, 166, 35, 0.55)',
         stationId: 'station-8',
         stationName: "Station 8 • Fazit",
